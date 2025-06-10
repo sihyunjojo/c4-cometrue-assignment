@@ -40,6 +40,19 @@ public class TransferLogUseCase {
 
 		return buildCursorPageResponse(slice.getContent(), slice.hasNext());
 	}
+	public TransferLogCursorPageResponseDto findAllBySendTimeAfterCursor2(TransferLogSearchRequestDto request) {
+		LocalDateTime startAt = Optional.ofNullable(request.cursorStartAt())
+			.orElse(LocalDateTime.now().minusDays(10));
+		String accountNumber = request.accountNumber();
+		Long id = request.cursorId();
+		int size = Optional.ofNullable(request.size()).orElse(10);
+
+		Slice<TransferLog> slice = (id == null)
+			? transferLogService.findAllBySendTimeAfterCursor(accountNumber, startAt, size)
+			: transferLogService.findAllBySendTimeAndIdAfterCursor2(accountNumber, startAt, id, size);
+
+		return buildCursorPageResponse(slice.getContent(), slice.hasNext());
+	}
 
 	public TransferLogCursorPageResponseDto findAllByOffsetOrDefaultPaging(TransferLogSearchRequestDto request) {
 		String accountNumber = request.accountNumber();

@@ -29,6 +29,11 @@ public class TransferLogService {
 		return transferLogRepository.findAllByAccountNumberAndSendTimeAndIdAfterCursor(accountNumber, startAt, startId, size);
 	}
 
+	public Slice<TransferLog> findAllBySendTimeAndIdAfterCursor2(String accountNumber, LocalDateTime startAt, Long startId, int size) {
+		return transferLogRepository.findAllByAccountNumberAndSendTimeAndIdAfterCursor2(accountNumber, startAt, startId, size);
+	}
+
+
 	public Slice<TransferLog> findAllBySendTimeAfterCursor(String accountNumber, LocalDateTime startAt, int size) {
 		return transferLogRepository.findAllByAccountNumberAndSendTimeAfterCursor(accountNumber, startAt, size);
 	}

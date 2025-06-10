@@ -32,21 +32,21 @@ public class TransferLogQueryRepositoryImpl implements TransferLogQueryRepositor
 	private final JPAQueryFactory queryFactory;
 
 	// fixme: fetch join 등으로 성능 향상 수정하기.
-	// @Override
-	// public Slice<TransferLog> findAllByAccountNumberAndSendTimeAndIdAfterCursor(
-	// 	String accountNumber,
-	// 	LocalDateTime cursorTime,
-	// 	Long cursorId,
-	// 	int size
-	// ) {
-	// 	BooleanExpression accountMatch = buildAccountMatch(accountNumber);
-	// 	DateTimeExpression<LocalDateTime> sortTime = buildSortTime(accountNumber);
-	//
-	// 	BooleanExpression cursorCondition = sortTime.gt(cursorTime)
-	// 		.or(sortTime.eq(cursorTime).and(transferLog.id.gt(cursorId)));
-	//
-	// 	return fetchSlice(accountMatch.and(cursorCondition), sortTime.asc(), size);
-	// }
+	@Override
+	public Slice<TransferLog> findAllByAccountNumberAndSendTimeAndIdAfterCursor2(
+		String accountNumber,
+		LocalDateTime cursorTime,
+		Long cursorId,
+		int size
+	) {
+		BooleanExpression accountMatch = buildAccountMatch(accountNumber);
+		DateTimeExpression<LocalDateTime> sortTime = buildSortTime(accountNumber);
+
+		BooleanExpression cursorCondition = sortTime.gt(cursorTime)
+			.or(sortTime.eq(cursorTime).and(transferLog.id.gt(cursorId)));
+
+		return fetchSlice(accountMatch.and(cursorCondition), sortTime.asc(), size);
+	}
 
 	@Override
 	public Slice<TransferLog> findAllByAccountNumberAndSendTimeAndIdAfterCursor(

@@ -37,4 +37,20 @@ public class TransferLogController {
 
 		return ResponseEntity.ok(ApiResponse.res(200, "송금 이력 조회 성공", result));
 	}
+
+	@Operation(summary = "송금 이력 조회", description = "startAt를 기준으로 커서 기반 송금 이력을 조회합니다.")
+	@GetMapping("/2")
+	public ResponseEntity<ApiResponse<TransferLogCursorPageResponseDto>> getTransferLogs2(
+		@Valid TransferLogSearchRequestDto request
+	) {
+		TransferLogCursorPageResponseDto result;
+
+		if (request.cursorStartAt() != null) {
+			result = transferLogUseCase.findAllBySendTimeAfterCursor2(request);
+		} else {
+			result = transferLogUseCase.findAllByOffsetOrDefaultPaging(request);
+		}
+
+		return ResponseEntity.ok(ApiResponse.res(200, "송금 이력 조회 성공", result));
+	}
 }

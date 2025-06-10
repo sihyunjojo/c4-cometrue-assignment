@@ -11,6 +11,9 @@ public interface TransferLogQueryRepository {
 	Slice<TransferLog> findAllByAccountNumberAndSendTimeAndIdAfterCursor(String accountNumber,
 		LocalDateTime cursorTime, Long cursorId, int size);
 
+	Slice<TransferLog> findAllByAccountNumberAndSendTimeAndIdAfterCursor2(String accountNumber,
+		LocalDateTime cursorTime, Long cursorId, int size);
+
 	Slice<TransferLog> findAllByAccountNumberAndSendTimeAfterCursor(String accountNumber,
 		LocalDateTime cursorTime, int size);
 
