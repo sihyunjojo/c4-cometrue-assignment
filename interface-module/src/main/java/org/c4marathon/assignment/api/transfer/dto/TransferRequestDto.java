@@ -1,5 +1,6 @@
 package org.c4marathon.assignment.api.transfer.dto;
 
+import org.c4marathon.assignment.api.transfer.validation.AccountHolder;
 import org.c4marathon.assignment.api.transfer.validation.DifferentAccounts;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -23,4 +24,5 @@ public record TransferRequestDto(
 	@NotNull(message = "송금 금액은 필수입니다.")
 	@PositiveOrZero(message = "음수는 송금할 수 없습니다.")
 	Long amount
-) {}
+) implements AccountHolder {
+}

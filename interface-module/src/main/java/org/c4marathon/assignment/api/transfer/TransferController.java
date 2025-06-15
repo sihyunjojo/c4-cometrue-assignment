@@ -1,5 +1,6 @@
 package org.c4marathon.assignment.api.transfer;
 
+import org.c4marathon.assignment.api.transfer.dto.TransferRequestDto;
 import org.c4marathon.assignment.response.ApiResponse;
 import org.c4marathon.assignment.api.transfer.dto.AccountNumberTransferRequestDto;
 import org.c4marathon.assignment.usecase.transfer.TransferUseCase;
@@ -26,14 +27,14 @@ public class TransferController {
 
 	private final TransferUseCase transferUseCase;
 
-	// @Operation(summary = "메인 계좌에서 메인 계좌로 즉시 송금 요청", description = "보류 없이 바로 송금하는 API입니다.")
-	// @PostMapping("main-to-main")
-	// public ResponseEntity<ApiResponse<String>> transferFromMainToMain(
-	// 	@Valid @RequestBody TransferRequestDto request
-	// ) {
-	// 	transferUseCase.transfer(request);
-	// 	return ResponseEntity.ok(ApiResponse.res(200, "송금 성공"));
-	// }
+	@Operation(summary = "메인 계좌에서 메인 계좌로 즉시 송금 요청", description = "보류 없이 바로 송금하는 API입니다.")
+	@PostMapping("main-to-main/2")
+	public ResponseEntity<ApiResponse<String>> transferFromMainToMain(
+		@Valid @RequestBody TransferRequestDto request
+	) {
+		transferUseCase.transfer(request);
+		return ResponseEntity.ok(ApiResponse.res(200, "송금 성공"));
+	}
 
 	@Operation(summary = "메인 계좌에서 메인 계좌로 계좌번호로 즉시 송금 요청", description = "계좌번호를 사용하여 보류 없이 바로 송금하는 API입니다.")
 	@PostMapping("main-to-main")
