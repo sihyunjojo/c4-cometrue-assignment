@@ -3,7 +3,12 @@ spring:
     name: mini-pay
 
   profiles:
-    active: mysql  # 현재 활성화할 프로파일 지정
+    active: oracle,dev  # 현재 활성화할 프로파일 지정
+
+  #항목	            prod	        dev	            local
+  #로그 태그	        prod	        dev	            local
+  #로그 분리 및 보존	일 단위, 30일	    분 단위, 30개     분 단위, 5개
+  #로그 레벨	        info	        trace        	info
 
   config:
     import:
@@ -45,3 +50,5 @@ logging:
 #              BasicBinder: TRACE
 #      .springframework:
 #        transaction: TRACE
+
+
