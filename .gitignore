@@ -89,3 +89,6 @@ naver-intellij-formatter.xml
 .env
 .env.local
 .env.*.local
+
+# assignments
+assignments
