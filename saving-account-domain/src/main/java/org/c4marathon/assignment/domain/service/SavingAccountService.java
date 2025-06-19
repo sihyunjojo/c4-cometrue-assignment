@@ -10,13 +10,11 @@ import org.c4marathon.assignment.AccountNumberGenerator;
 import org.c4marathon.assignment.AccountNumberRetryExecutor;
 import org.c4marathon.assignment.domain.model.MainAccount;
 import org.c4marathon.assignment.domain.model.SavingAccount;
+import org.c4marathon.assignment.domain.policy.SavingAccountPolicy;
 import org.c4marathon.assignment.domain.repository.MainAccountRepository;
 import org.c4marathon.assignment.domain.repository.SavingAccountRepository;
 import org.c4marathon.assignment.exception.RetryableException;
-import org.c4marathon.assignment.infra.properties.SavingAccountPolicy;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -28,7 +26,6 @@ public class SavingAccountService {
 	private final AccountNumberRetryExecutor accountNumberRetryExecutor;
 	private final SavingAccountPolicy savingAccountPolicy;
 
-	@Transactional
 	public SavingAccount createFixedSavingAccount(Long memberId, Long subscribedDepositAmount) {
 		MainAccount mainAccount = mainAccountRepository.findByMemberId(memberId)
 			.orElseThrow(() -> new IllegalArgumentException("메인 계좌를 찾을 수 없습니다."));
@@ -37,8 +34,8 @@ public class SavingAccountService {
 
 		SavingAccount savingAccount = SavingAccount.createFixed(
 			accountNumber,
-			mainAccount.getMember(),
-			mainAccount,
+			memberId,
+			mainAccount.getId(),
 			subscribedDepositAmount
 		);
 
@@ -46,12 +43,10 @@ public class SavingAccountService {
 		return savingAccount;
 	}
 
-	@Transactional(readOnly = true)
 	public List<SavingAccount> findAll(){
 		return savingAccountRepository.findAll();
 	}
 
-	@Transactional
 	public SavingAccount createFlexibleSavingAccount(Long memberId) {
 		MainAccount mainAccount = mainAccountRepository.findByMemberId(memberId)
 			.orElseThrow(() -> new IllegalArgumentException("메인 계좌를 찾을 수 없습니다."));
@@ -60,8 +55,8 @@ public class SavingAccountService {
 
 		SavingAccount savingAccount = SavingAccount.createFlexible(
 			accountNumber,
-			mainAccount.getMember(),
-			mainAccount
+			memberId,
+			mainAccount.getId()
 		);
 
 		savingAccountRepository.save(savingAccount);
@@ -79,26 +74,27 @@ public class SavingAccountService {
 		});
 	}
 
-	@Transactional(readOnly = true)
 	public SavingAccount findByAccountNumberOrThrow(String accountNumber) {
 		return savingAccountRepository.findByAccountNumber(accountNumber)
 			.orElseThrow(() -> new IllegalStateException(String.format("계좌번호 %s인 적금 계좌가 존재하지 않습니다.", accountNumber)));
 	}
-	
-	@Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-	public SavingAccount getRefreshedAccount(Long accountId) {
+
+	public SavingAccount findById(Long accountId) {
+		return savingAccountRepository.findById(accountId)
+			.orElseThrow(() -> new IllegalStateException(String.format("ID가 %s인 적금 계좌가 존재하지 않습니다.", accountId)));
+	}
+
+	public SavingAccount findByIdWithoutSecondCache(Long accountId) {
 		return savingAccountRepository.findByIdWithoutSecondCache(accountId)
 			.orElseThrow(() -> new IllegalStateException(String.format("ID가 %s인 적금 계좌가 존재하지 않습니다.", accountId)));
 	}
 
-	@Transactional(readOnly = true)
 	public Long getMainAccountId(Long savingAccountId) {
 		SavingAccount savingAccount = savingAccountRepository.findById(savingAccountId)
 			.orElseThrow(() -> new IllegalArgumentException("적금 계좌를 찾을 수 없음"));
-		return savingAccount.getMainAccount().getId();
+		return savingAccount.getMainAccountId();
 	}
 
-	@Transactional
 	public Long applyInterest(SavingAccount account) {
 		double rate = savingAccountPolicy.getInterestRate(account.getSavingType());
 		Long interest = account.calculateInterest(rate);
@@ -106,19 +102,19 @@ public class SavingAccountService {
 		return interest;
 	}
 
-	public Map<MainAccount, List<SavingAccount>> getSubscribedDepositAmount() {
+	public Map<Long, List<SavingAccount>> getSubscribedDepositAmount() {
 		List<SavingAccount> accounts = savingAccountRepository.findAllFixedSavingAccountWithMainAccount();
 
 		return accounts.stream()
 			.filter(this::isLinkedToMainAccount)
 			.collect(Collectors.groupingBy(
-				SavingAccount::getMainAccount,
+				SavingAccount::getMainAccountId,
 				Collectors.toList()
 			));
 	}
 
 	private boolean isLinkedToMainAccount(SavingAccount account) {
-		return account.getMember() != null && account.getMainAccount() != null;
+		return account.getMemberId() != null && account.getMainAccountId() != null;
 	}
 }
 

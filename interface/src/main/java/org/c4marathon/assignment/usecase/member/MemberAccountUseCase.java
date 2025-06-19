@@ -19,11 +19,7 @@ public class MemberAccountUseCase {
 
 	@Transactional
 	public MainAccount registerMemberWithAccount(MemberRegistrationRequestDto request) {
-		Member member = Member.builder()
-			.name(request.name())
-			.email(request.email())
-			.password(request.password())
-			.build();
+		Member member = Member.register(request.name(), request.email(), request.password());
 
 		member = memberService.registerember(member);
 		return mainAccountService.createMainAccountForMember(member);

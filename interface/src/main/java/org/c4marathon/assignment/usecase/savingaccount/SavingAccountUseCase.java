@@ -14,10 +14,9 @@ import org.c4marathon.assignment.domain.service.SavingAccountService;
 import org.c4marathon.assignment.domain.service.TransferLogFactory;
 import org.c4marathon.assignment.domain.service.TransferLogService;
 import org.c4marathon.assignment.domain.service.TransferService;
-import org.c4marathon.assignment.infra.properties.MainAccountPolicy;
-import org.c4marathon.assignment.model.Account;
-import org.c4marathon.assignment.model.policy.ExternalAccountPolicy;
+import org.c4marathon.assignment.policy.ExternalAccountPolicy;
 import org.c4marathon.assignment.retry.RetryExecutor;
+import org.c4marathon.assignment.usecase.charge.ChargeUsecase;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -33,8 +32,8 @@ public class SavingAccountUseCase {
 	private final TransferLogService transferLogService;
 
 	private final TransferLogFactory transferLogFactory;
-	private final MainAccountPolicy mainAccountPolicy;
 	private final RetryExecutor retryExecutor;
+	private final ChargeUsecase chargeUsecase;
 
 	@Transactional
 	public SavingAccountResponseDto registerFixedSavingAccount(Long memberId, CreateFixedSavingAccountRequestDto request) {
@@ -54,28 +53,27 @@ public class SavingAccountUseCase {
 		Long shortfall = mainAccountService.calculateShortfall(mainAccountId, amount);
 
 		if (shortfall > 0) {
-			long chargeAmount = mainAccountPolicy.getRoundedCharge(shortfall);
-			mainAccountService.chargeOrThrow(mainAccountId, chargeAmount, amount);
+			chargeUsecase.charge(mainAccountId, shortfall, amount);
 
-			MainAccount toAccount = mainAccountService.getRefreshedAccount(mainAccountId);
+			MainAccount toAccount = mainAccountService.findById(mainAccountId);
 			TransferLog chargeLog = transferLogFactory.createExternalChargeLog(
 				ExternalAccountPolicy.TEMPORARY_CHARGING,
 				toAccount,
-				chargeAmount);
+				shortfall);
 			transferLogService.saveTransferLog(chargeLog);
 		}
 
 		Callable<Void> performDeposit = () -> {
-			var fromAccount = mainAccountService.getRefreshedAccount(mainAccountId);
-			var toAccount = savingAccountService.getRefreshedAccount(savingAccountId);
-			transferService.transferInNewTransaction(fromAccount, toAccount, amount);
+			var fromAccount = mainAccountService.findByIdWithoutSecondCache(mainAccountId);
+			var toAccount = savingAccountService.findByIdWithoutSecondCache(savingAccountId);
+			transferService.transfer(fromAccount, toAccount, amount);
 			return null;
 		};
 
 		retryExecutor.executeWithRetry(performDeposit);
 
-		MainAccount fromAccount = mainAccountService.getRefreshedAccount(mainAccountId);
-		SavingAccount toAccount = savingAccountService.getRefreshedAccount(savingAccountId);
+		MainAccount fromAccount = mainAccountService.findById(mainAccountId);
+		SavingAccount toAccount = savingAccountService.findById(savingAccountId);
 		TransferLog depositLog = transferLogFactory.createImmediateTransferLog(
 			fromAccount, 
 			toAccount, 
@@ -88,11 +86,12 @@ public class SavingAccountUseCase {
 	// ✅ 비즈니스 로직이 복잡해지면 Service로 넘기는 게 맞다.
 	@Transactional
 	public void processFixedSavingDeposits() {
-		Map<MainAccount, List<SavingAccount>> amountMapping = savingAccountService.getSubscribedDepositAmount();
+		Map<Long, List<SavingAccount>> amountMapping = savingAccountService.getSubscribedDepositAmount();
 
 		// 각 메인 계좌별로 처리
-		for (Map.Entry<MainAccount, List<SavingAccount>> entry : amountMapping.entrySet()) {
-			MainAccount mainAccount = entry.getKey();
+		for (Map.Entry<Long, List<SavingAccount>> entry : amountMapping.entrySet()) {
+			Long mainAccountId = entry.getKey();
+			MainAccount mainAccount = mainAccountService.findById(mainAccountId);
 
 			List<SavingAccount> savingAccounts = entry.getValue();
 
@@ -100,17 +99,16 @@ public class SavingAccountUseCase {
 			long totalAmount = getTotalAmount(savingAccounts);
 
 			// 잔액 부족분 확인
-			long shortfall = mainAccountService.calculateShortfall(mainAccount.getId(), totalAmount);
+			long shortfall = mainAccountService.calculateShortfall(mainAccountId, totalAmount);
 
 			// 잔액 부족 시 충전 진행
 			if (shortfall > 0) {
-				long chargeAmount = mainAccountPolicy.getRoundedCharge(shortfall);
-				mainAccountService.chargeOrThrow(mainAccount.getId(), chargeAmount, totalAmount);
+				chargeUsecase.charge(mainAccountId, shortfall, totalAmount);
 
 				TransferLog transferLog = transferLogFactory.createExternalChargeLog(
 					ExternalAccountPolicy.TEMPORARY_CHARGING,
 					mainAccount,
-					chargeAmount);
+					shortfall);
 				transferLogService.saveTransferLog(transferLog);
 			}
 
@@ -128,9 +126,9 @@ public class SavingAccountUseCase {
 
 		try {
 			Callable<Void> performTransfer = () -> {
-				var from = mainAccountService.getRefreshedAccount(fromAccountId);
-				var to = savingAccountService.getRefreshedAccount(toAccountId);
-				transferService.transferInNewTransaction(from, to, amount);
+				var from = mainAccountService.findByIdWithoutSecondCache(fromAccountId);
+				var to = savingAccountService.findByIdWithoutSecondCache(toAccountId);
+				transferService.transfer(from, to, amount);
 				return null;
 			};
 
@@ -140,10 +138,10 @@ public class SavingAccountUseCase {
 			throw new RuntimeException("이자 입금 중 오류 발생: " + e.getMessage(), e);
 		}
 
-		Account fromAccount = mainAccountService.getRefreshedAccount(fromAccountId);
-		Account toAccount = savingAccountService.getRefreshedAccount(toAccountId);
+		MainAccount fromAccount = mainAccountService.findById(fromAccountId);
+		SavingAccount toAccount = savingAccountService.findById(toAccountId);
 		TransferLog depositLog = transferLogFactory.createFixedTermTransferLog(
-			fromAccount, 
+			fromAccount,
 			toAccount, 
 			amount);
 		transferLogService.saveTransferLog(depositLog);

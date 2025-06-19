@@ -27,7 +27,7 @@ public record TransferLogDto(
 			AccountSnapshotDto.from(log.getFrom()),
 			AccountSnapshotDto.from(log.getTo()),
 			log.getAmount(),
-			log.getType().name(),
+			log.getTo().number(),
 			log.getStatus().name(),
 			log.getSendTime(),
 			log.getReceiverTime(),
