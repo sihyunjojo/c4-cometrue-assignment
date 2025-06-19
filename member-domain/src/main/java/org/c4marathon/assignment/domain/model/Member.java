@@ -1,51 +1,37 @@
 package org.c4marathon.assignment.domain.model;
 
-import jakarta.persistence.*;
-import lombok.*;
+import java.time.LocalDateTime;
 
-import org.c4marathon.assignment.model.BaseTimeEntity;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
-@Entity
 @Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Member extends BaseTimeEntity {
+@AllArgsConstructor
+public class Member {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+	private final Long id;
+	private final String name;
+	private final String email;
+	private final String password;
+	private final LocalDateTime createdAt;
+	private final LocalDateTime updatedAt;
 
-	private String name;
 
-	private String email;
+	public static Member register(String name, String email, String password) {
+		return new Member(null, name, email, password);
+	}
 
-	private String password;
+	public static Member to(Long id, String name, String email, String password) {
+		return new Member(id, name, email, password);
+	}
 
-	// @OneToOne(mappedBy = "member", cascade = CascadeType.REMOVE, orphanRemoval = true)
-	// private MainAccount mainAccount;
-
-	// JPA가 관계를 매핑하면서 null이 될 수도 있기 때문에, 컬렉션은 항상 초기화해두는 것이 안전
-	// final 키워드와 함께 초기화하면 해당 리스트 자체의 참조는 바뀌지 않게 돼 (내용은 변경 가능)
-	// @OneToMany(mappedBy = "member", cascade = CascadeType.REMOVE, orphanRemoval = true)
-	// private final List<SavingAccount> savingAccounts = new ArrayList<>();
-
-	@Builder
-	public Member(String name, String email, String password) {
+	private Member(Long id, String name, String email, String password) {
+		this.id = id;
 		this.name = name;
 		this.email = email;
 		this.password = password;
+		this.createdAt = null;
+		this.updatedAt = null;
 	}
 
-	// public void setMainAccount(MainAccount mainAccount) {
-	// 	this.mainAccount = mainAccount;
-	// 	if (mainAccount != null && mainAccount.getMember() != this) {
-	// 		mainAccount.setMember(this);
-	// 	}
-	// }
-	//
-	// public void addSavingAccount(SavingAccount savingAccount) {
-	// 	savingAccounts.add(savingAccount);
-	// 	if (savingAccount != null && savingAccount.getMember() != this) {
-	// 		savingAccount.setMember(this);
-	// 	}
-	// }
 }

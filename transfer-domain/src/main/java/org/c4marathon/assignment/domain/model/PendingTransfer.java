@@ -1,55 +1,68 @@
 package org.c4marathon.assignment.domain.model;
 
-import jakarta.persistence.*;
-import lombok.*;
-
 import java.time.Duration;
 import java.time.LocalDateTime;
 
 import org.c4marathon.assignment.enums.TransferStatus;
 import org.c4marathon.assignment.enums.TransferType;
-import org.c4marathon.assignment.model.BaseTimeEntity;
 
-@Entity
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+
 @Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
 @Builder
-public class PendingTransfer extends BaseTimeEntity {
+@AllArgsConstructor
+public class PendingTransfer {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
-
-	@Builder.Default
-	private Long amount = 0L;
-
-	@Enumerated(EnumType.STRING)
-	@Column(nullable = false)
-	private TransferType type;
-
-	@Enumerated(EnumType.STRING)
-	@Column(nullable = false)
+	private final Long id;
+	private final Long amount;
+	private final TransferType type;
 	private TransferStatus status;
+	private final LocalDateTime expiredAt;
+	private final Long fromMainAccountId;
+	private final Long toMainAccountId;
+	private final LocalDateTime createdAt;
+	private final LocalDateTime updatedAt;
 
-	private LocalDateTime expiredAt;
+	public static PendingTransfer to(Long id, Long amount, TransferType type, TransferStatus status, LocalDateTime expiredAt, Long fromMainAccountId, Long toMainAccountId) {
+		return PendingTransfer.builder()
+			.id(id)
+			.amount(amount)
+			.type(type)
+			.status(status)
+			.expiredAt(expiredAt)
+			.fromMainAccountId(fromMainAccountId)
+			.toMainAccountId(toMainAccountId)
+			.build();
+	}
 
-	@Setter
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "from_main_account_id", nullable = false)
-	private MainAccount fromMainAccount;
+	public static PendingTransfer createPending(Long fromMainAccountId, Long toMainAccountId, Long amount, Duration expireAfter, LocalDateTime createdAt, LocalDateTime updatedAt) {
+		return new PendingTransfer(
+			null,
+			amount,
+			TransferType.PENDING,
+			TransferStatus.PENDING,
+			LocalDateTime.now().plus(expireAfter),
+			fromMainAccountId,
+			toMainAccountId,
+			createdAt,
+			updatedAt
+		);
+	}
 
-	@Setter
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "to_main_account_id", nullable = false)
-	private MainAccount toMainAccount;
-
-	public static PendingTransfer createPending(MainAccount fromMainAccount, MainAccount toMainAccount, Long amount,
-		Duration expireAfter) {
-		LocalDateTime expiredAt = LocalDateTime.now().plus(expireAfter);
-
-		return new PendingTransfer(null, amount, TransferType.PENDING,
-			TransferStatus.PENDING, expiredAt, fromMainAccount, toMainAccount);
+	public static PendingTransfer createPending(Long fromMainAccountId, Long toMainAccountId, Long amount, Duration expireAfter) {
+		return new PendingTransfer(
+			null,
+			amount,
+			TransferType.PENDING,
+			TransferStatus.PENDING,
+			LocalDateTime.now().plus(expireAfter),
+			fromMainAccountId,
+			toMainAccountId,
+			null,
+			null
+		);
 	}
 
 	public void markAsCompleted() {
@@ -63,4 +76,5 @@ public class PendingTransfer extends BaseTimeEntity {
 	public void markAsExpired() {
 		this.status = TransferStatus.EXPIRED;
 	}
+
 }
