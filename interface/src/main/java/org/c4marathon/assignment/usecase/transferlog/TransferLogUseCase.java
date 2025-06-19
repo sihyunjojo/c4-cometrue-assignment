@@ -7,11 +7,9 @@ import lombok.RequiredArgsConstructor;
 import org.c4marathon.assignment.api.transferlog.dto.TransferLogCursorPageResponseDto;
 import org.c4marathon.assignment.api.transferlog.dto.TransferLogDto;
 import org.c4marathon.assignment.api.transferlog.dto.TransferLogSearchRequestDto;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
-import org.springframework.data.domain.Sort;
+import org.c4marathon.assignment.pagination.PageRequest;
+import org.c4marathon.assignment.pagination.PageResult;
+import org.c4marathon.assignment.pagination.SliceResult;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -34,11 +32,11 @@ public class TransferLogUseCase {
 		Long id = request.cursorId();
 		int size = Optional.ofNullable(request.size()).orElse(10);
 
-		Slice<TransferLog> slice = (id == null)
+		SliceResult<TransferLog> slice = (id == null)
 			? transferLogService.findAllBySendTimeAfterCursor(accountNumber, startAt, size)
 			: transferLogService.findAllBySendTimeAndIdAfterCursor(accountNumber, startAt, id, size);
 
-		return buildCursorPageResponse(slice.getContent(), slice.hasNext());
+		return buildCursorPageResponse(slice.getContents(), slice.hasNext());
 	}
 
 	public TransferLogCursorPageResponseDto findAllByOffsetOrDefaultPaging(
@@ -47,16 +45,9 @@ public class TransferLogUseCase {
 		int page = Optional.ofNullable(request.page()).orElse(0);
 		int size = Optional.ofNullable(request.size()).orElse(10);
 
-		Pageable pageable = createPageable(page, size, Sort.by("sendTime").descending().and(Sort.by("id").descending()));
-
-		Page<TransferLog> pageResult = transferLogService.findRecentLogs(accountNumber, pageable);
-
-		return buildCursorPageResponse(pageResult.getContent(), pageResult.hasNext());
-	}
-
-	// 페이지 및 정렬 생성 헬퍼
-	private Pageable createPageable(int page, int size, Sort sort) {
-		return PageRequest.of(page, size, sort);
+		PageRequest pageRequest = PageRequest.of(page, size);
+		PageResult<TransferLog> result = transferLogService.findRecentLogs(accountNumber, pageRequest);
+		return buildCursorPageResponse(result.getContents(), result.hasNext());
 	}
 
 	// 커서 기반 응답 조립 헬퍼

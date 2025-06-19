@@ -5,11 +5,10 @@ import lombok.RequiredArgsConstructor;
 
 import org.c4marathon.assignment.domain.model.TransferLog;
 import org.c4marathon.assignment.domain.repository.TransferLogRepository;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
+import org.c4marathon.assignment.pagination.PageRequest;
+import org.c4marathon.assignment.pagination.PageResult;
+import org.c4marathon.assignment.pagination.SliceResult;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
@@ -20,20 +19,19 @@ public class TransferLogService {
 
 	private final TransferLogRepository transferLogRepository;
 
-	@Transactional
 	public void saveTransferLog(TransferLog transferLog) {
 		transferLogRepository.save(transferLog);
 	}
 
-	public Slice<TransferLog> findAllBySendTimeAndIdAfterCursor(String accountNumber, LocalDateTime startAt, Long startId, int size) {
+	public SliceResult<TransferLog> findAllBySendTimeAndIdAfterCursor(String accountNumber, LocalDateTime startAt, Long startId, int size) {
 		return transferLogRepository.findAllByAccountNumberAndSendTimeAndIdAfterCursor(accountNumber, startAt, startId, size);
 	}
 
-	public Slice<TransferLog> findAllBySendTimeAfterCursor(String accountNumber, LocalDateTime startAt, int size) {
+	public SliceResult<TransferLog> findAllBySendTimeAfterCursor(String accountNumber, LocalDateTime startAt, int size) {
 		return transferLogRepository.findAllByAccountNumberAndSendTimeAfterCursor(accountNumber, startAt, size);
 	}
 
-	public Page<TransferLog> findRecentLogs(String accountNumber, Pageable pageable) {
-		return transferLogRepository.findPageByAccountNumber(accountNumber, pageable);
+	public PageResult<TransferLog> findRecentLogs(String accountNumber, PageRequest request) {
+		return transferLogRepository.findPageByAccountNumber(accountNumber, request);
 	}
 }
