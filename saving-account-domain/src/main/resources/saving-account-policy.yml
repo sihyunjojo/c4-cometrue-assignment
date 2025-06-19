@@ -1,0 +1,7 @@
+business:
+  rule:
+    account:
+      saving:
+        fixed-interest-rate: 0.05
+        flexible-interest-rate: 0.03
+        account-prefix: "02"

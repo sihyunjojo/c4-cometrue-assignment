@@ -1,0 +1,9 @@
+business:
+  rule:
+    account:
+      main:
+        # 일일 이체 한도 (원)
+        main-daily-limit: 3000000
+        # 자동 충전 단위 (원)
+        charge-unit: 10000
+        account-prefix: "01"
