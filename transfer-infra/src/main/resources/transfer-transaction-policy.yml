@@ -1,0 +1,3 @@
+transfer-policy:
+  pending-transfer-expire-after-duration-hours: 72
+  pending-transfer-remind-duration-hours: 24
