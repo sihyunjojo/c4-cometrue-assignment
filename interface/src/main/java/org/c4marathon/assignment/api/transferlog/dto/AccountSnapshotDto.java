@@ -1,6 +1,6 @@
 package org.c4marathon.assignment.api.transferlog.dto;
 
-import org.c4marathon.assignment.domain.model.AccountSnapshot;
+import org.c4marathon.assignment.domain.model.vo.AccountSnapshot;
 
 import lombok.Builder;
 
@@ -13,9 +13,9 @@ public record AccountSnapshotDto(
 	public static AccountSnapshotDto from(AccountSnapshot snapshot) {
 		if (snapshot == null) return null;
 		return new AccountSnapshotDto(
-			snapshot.getId(),
-			snapshot.getType().name(),
-			snapshot.getNumber()
+			snapshot.id(),
+			snapshot.type().name(),
+			snapshot.number()
 		);
 	}
 }
