@@ -1,4 +1,4 @@
-package org.c4marathon.assignment.infra.persistence.query;
+package org.c4marathon.assignment.infra.persistence.repository.query;
 
 import java.time.LocalDateTime;
 
