@@ -5,7 +5,9 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionSystemException;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.OptimisticLockException;
@@ -14,20 +16,23 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
-@RequiredArgsConstructor
 public class RetryExecutor {
 
+
 	private static final int MAX_RETRY = 3;
-	// 10초 (connection-timeout) 동안 100개의 커넥션이 돌아간다면 → 100ms~500ms 백오프는 적정 대기 타임
 	private static final long BASE_SLEEP_TIME_MS = 300;      // 초기 대기 시간 : 정상 요청이 20~50ms라면 300ms 정도면 대부분의 락이 풀렸을 확률 높음 -> 동시에 같은 계좌를 접근할 가능성이 높은 서비스면 300~600ms 이상 추천
 	private static final long MAX_SLEEP_TIME_MS = 2000;
 
-
-	// 멀티스레드 환경에서 동시성 문제 없이 다음을 수행하고 싶을 때:
-	// private final ConcurrentLinkedQueue<Integer> retryAttemptHistory = new ConcurrentLinkedQueue<>();
+	// private final ConcurrentLinkedQueue<Integer> retryAttemptHistory = new ConcurrentLinkedQueue<>(); 	// 멀티스레드 환경에서 동시성 문제 없이 다음을 수행하고 싶을 때:
 
 	private final EntityManager entityManager;
+	private final TransactionTemplate newTransactionTemplate;
 
+	public RetryExecutor(EntityManager entityManager, TransactionTemplate transactionTemplate) {
+		this.entityManager = entityManager;
+		this.newTransactionTemplate = transactionTemplate;
+		this.newTransactionTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+	}
 
 	/**
 	 * 재시도 로직을 통한 함수 실행
@@ -45,10 +50,20 @@ public class RetryExecutor {
 
 		while (attempts < MAX_RETRY) {
 			try {
-				T result = operation.call(); // ← 값을 받아 리턴
+				// T result = operation.call(); // ← 값을 받아 리턴
+				T result = newTransactionTemplate.execute(status -> {
+					try {
+						return operation.call();
+					} catch (Exception e) {
+						throw new RuntimeException(e);
+					}
+				});
 				return result;
 			} catch (Exception e) {
-				if (isRetryableException(e)) {
+				Throwable cause = e.getCause();
+				Exception actualException = (cause instanceof Exception) ? (Exception) cause : e;
+
+				if (isRetryableException(actualException)) {
 					attempts++;
 					lastException = e;
 
