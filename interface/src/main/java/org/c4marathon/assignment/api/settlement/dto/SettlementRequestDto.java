@@ -2,7 +2,7 @@ package org.c4marathon.assignment.api.settlement.dto;
 
 import java.util.List;
 
-import org.c4marathon.assignment.model.policy.SettlementPolicy;
+import org.c4marathon.assignment.policy.SettlementPolicy;
 import org.c4marathon.assignment.validation.NoDuplicateElements;
 
 import io.swagger.v3.oas.annotations.media.Schema;

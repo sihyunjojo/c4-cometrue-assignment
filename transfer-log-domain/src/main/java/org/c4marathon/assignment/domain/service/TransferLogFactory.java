@@ -4,9 +4,9 @@ import java.time.Clock;
 import java.time.LocalDateTime;
 
 import org.c4marathon.assignment.domain.model.TransferLog;
-import org.c4marathon.assignment.domain.model.AccountSnapshot;
+import org.c4marathon.assignment.domain.model.vo.AccountSnapshot;
 import org.c4marathon.assignment.model.Account;
-import org.c4marathon.assignment.model.policy.ExternalAccountPolicy;
+import org.c4marathon.assignment.policy.ExternalAccountPolicy;
 import org.c4marathon.assignment.enums.TransferType;
 import org.c4marathon.assignment.enums.TransferStatus;
 import org.springframework.stereotype.Component;

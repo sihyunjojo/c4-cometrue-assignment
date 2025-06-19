@@ -2,7 +2,7 @@ package org.c4marathon.assignment.domain.command;
 
 import java.util.List;
 
-import org.c4marathon.assignment.model.policy.SettlementPolicy;
+import org.c4marathon.assignment.policy.SettlementPolicy;
 
 public record SettlementCommand(
 	SettlementPolicy policyType,
