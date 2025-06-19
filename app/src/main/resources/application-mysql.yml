@@ -1,0 +1,19 @@
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/minipay?serverTimezone=Asia/Seoul
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: sihyun
+    password: plate0113!
+    hikari:
+      maximum-pool-size: 350    # 동시에 사용 가능한 최대 DB 연결 수 : 너무 높으면 오히려 부하됨. (전체 사용할 거같은거 ~ + 50)
+      minimum-idle: 50      # 최소 유휴 커넥션 수 (항상 대기 상태로 유지): 전체 maximum-pool-size의 10~20% 수준이 일반적
+      connection-timeout: 5000  # 커넥션 풀에서 커넥션을 얻기 위한 최대 대기 시간 (5초)
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+    database-platform: org.hibernate.dialect.MySQLDialect

@@ -1,0 +1,25 @@
+spring:
+  datasource:
+    url: jdbc:oracle:thin:@localhost:1521/ORCLPDB1
+    driver-class-name: oracle.jdbc.OracleDriver
+    username: sihyun
+    password: Plate0113
+    hikari:
+      maximum-pool-size: 350    # 동시에 사용 가능한 최대 DB 연결 수 : 너무 높으면 오히려 부하됨. (전체 사용할 거같은거 ~ + 50)
+      minimum-idle: 50      # 최소 유휴 커넥션 수 (항상 대기 상태로 유지): 전체 maximum-pool-size의 10~20% 수준이 일반적
+      connection-timeout: 5000  # 커넥션 풀에서 커넥션을 얻기 위한 최대 대기 시간 (5초)
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+      # 4. Hibernate 명명 전략 추가 (권장)
+      # Spring Boot는 기본적으로 자바의 camelCase 필드 이름(예: userName)을 데이터베이스의 snake_case 컬럼 이름(예: user_name)으로 자동 변환하는 SpringPhysicalNamingStrategy를 사용합니다.
+      # 하지만 오라클은 따옴표로 묶지 않은 객체 이름(테이블, 컬럼)을 기본적으로 대문자로 저장하고 대소문자를 구분하지 않습니다. 따라서 user_name은 실제로는 USER_NAME으로 저장됩니다.
+      # userName → user_name → Oracle은 USER_NAME
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
+    open-in-view: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.Oracle12cDialect
+      database-platform: org.hibernate.dialect.Oracle12cDialect
