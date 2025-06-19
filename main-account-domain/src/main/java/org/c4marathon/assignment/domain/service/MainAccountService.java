@@ -7,12 +7,11 @@ import org.c4marathon.assignment.AccountNumberGenerator;
 import org.c4marathon.assignment.AccountNumberRetryExecutor;
 import org.c4marathon.assignment.domain.model.MainAccount;
 import org.c4marathon.assignment.domain.model.Member;
+import org.c4marathon.assignment.domain.policy.MainAccountPolicy;
 import org.c4marathon.assignment.domain.repository.MainAccountRepository;
 import org.c4marathon.assignment.exception.RetryableException;
-import org.c4marathon.assignment.infra.properties.MainAccountPolicy;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
+
 
 @Slf4j
 @Service
@@ -24,19 +23,17 @@ public class MainAccountService {
 	private final AccountNumberGenerator accountNumberGenerator;
 	private final AccountNumberRetryExecutor accountNumberRetryExecutor;
 
-    @Transactional(readOnly = true)
     public MainAccount findByAccountNumberOrThrow(String accountNumber) {
         return mainAccountRepository.findByAccountNumber(accountNumber)
             .orElseThrow(() -> new IllegalStateException(String.format("계좌번호 %s인 메인 계좌가 존재하지 않습니다.", accountNumber)));
     }
 
-	@Transactional
 	public MainAccount createMainAccountForMember(Member member) {
 		validateNoMainAccount(member);
 
 		String accountNumber = generateUniqueAccountNumber();
 
-		MainAccount mainAccount = MainAccount.create(member, accountNumber);
+		MainAccount mainAccount = MainAccount.create(accountNumber, member.getId());
 
 		return mainAccountRepository.save(mainAccount);
 	}
@@ -62,13 +59,16 @@ public class MainAccountService {
 		});
 	}
 
-	@Transactional(propagation = Propagation.REQUIRES_NEW, readOnly = true)
-	public MainAccount getRefreshedAccount(Long accountId) {
+	public MainAccount findById(Long accountId) {
+		return mainAccountRepository.findById(accountId)
+			.orElseThrow(() -> new IllegalStateException(String.format("ID가 %s인 메인 계좌가 존재하지 않습니다.", accountId)));
+	}
+
+	public MainAccount findByIdWithoutSecondCache(Long accountId) {
 		return mainAccountRepository.findByIdWithoutSecondCache(accountId)
 			.orElseThrow(() -> new IllegalStateException(String.format("ID가 %s인 메인 계좌가 존재하지 않습니다.", accountId)));
 	}
 
-	@Transactional
 	public void resetAllDailyChargeAmount() {
 		mainAccountRepository.resetAllDailyChargeAmount();
 	}
@@ -80,7 +80,6 @@ public class MainAccountService {
 		return Math.max(diff, 0L);
 	}
 
-	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public void chargeOrThrow(Long accountId, Long chargeAmount, Long minRequiredBalance) {
 		boolean success = mainAccountRepository.tryFastCharge(accountId, chargeAmount, minRequiredBalance,
 			mainAccountPolicy.getMainDailyLimit());
