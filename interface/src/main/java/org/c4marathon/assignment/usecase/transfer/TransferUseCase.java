@@ -9,8 +9,8 @@ import org.c4marathon.assignment.domain.service.SavingAccountService;
 import org.c4marathon.assignment.domain.service.TransferLogFactory;
 import org.c4marathon.assignment.domain.service.TransferLogService;
 import org.c4marathon.assignment.domain.service.TransferService;
-import org.c4marathon.assignment.infra.properties.MainAccountPolicy;
-import org.c4marathon.assignment.model.policy.ExternalAccountPolicy;
+import org.c4marathon.assignment.usecase.charge.ChargeUsecase;
+import org.c4marathon.assignment.policy.ExternalAccountPolicy;
 import org.c4marathon.assignment.retry.RetryExecutor;
 import org.c4marathon.assignment.api.transfer.dto.TransferRequestDto;
 import org.c4marathon.assignment.api.transfer.dto.AccountNumberTransferRequestDto;
@@ -34,7 +34,7 @@ public class TransferUseCase {
 	private final TransferLogService transferLogService;
 	private final TransferLogFactory transferLogFactory;
 	private final RetryExecutor retryExecutor;
-	private final MainAccountPolicy mainAccountPolicy;
+	private final ChargeUsecase chargeUsecase;
 
 	/**
 	 * 계좌 ID를 기반으로 일반 계좌 간 이체를 수행합니다.
@@ -93,12 +93,11 @@ public class TransferUseCase {
 		Long shortfall = mainAccountService.calculateShortfall(accountId, amount);
 
 		if (shortfall > 0) {
-			long chargeAmount = mainAccountPolicy.getRoundedCharge(shortfall);
-			mainAccountService.chargeOrThrow(accountId, chargeAmount, amount);
+			chargeUsecase.charge(accountId, shortfall, amount);
 
-			MainAccount refreshedAccount = mainAccountService.getRefreshedAccount(accountId);
+			MainAccount refreshedAccount = mainAccountService.findById(accountId);
 			TransferLog transferLog = transferLogFactory.createExternalChargeLog(
-				ExternalAccountPolicy.TEMPORARY_CHARGING, refreshedAccount, chargeAmount);
+				ExternalAccountPolicy.TEMPORARY_CHARGING, refreshedAccount, shortfall);
 			transferLogService.saveTransferLog(transferLog);
 		}
 	}
@@ -107,12 +106,12 @@ public class TransferUseCase {
 	 * 일반 계좌 간(MainAccount -> MainAccount) 송금을 실행합니다.
 	 */
 	private void executeMainToMainTransfer(Long fromAccountId, Long toAccountId, Long amount) {
-		MainAccount refreshedFromAccount = mainAccountService.getRefreshedAccount(fromAccountId);
-		MainAccount refreshedToAccount = mainAccountService.getRefreshedAccount(toAccountId);
+		MainAccount refreshedFromAccount = mainAccountService.findById(fromAccountId);
+		MainAccount refreshedToAccount = mainAccountService.findById(toAccountId);
 
 		// 송금 실행 (재시도 로직 포함)
 		retryExecutor.executeWithRetry(() -> {
-			transferService.transferInNewTransaction(refreshedFromAccount, refreshedToAccount, amount);
+			transferService.transfer(refreshedFromAccount, refreshedToAccount, amount);
 			log.debug("일반 계좌 간 송금 완료: {} -> {}, 금액: {}",
 				refreshedFromAccount.getAccountNumber(),
 				refreshedToAccount.getAccountNumber(),
@@ -130,12 +129,12 @@ public class TransferUseCase {
 	 * 일반 계좌에서 적금 계좌로(MainAccount -> SavingAccount) 송금을 실행합니다.
 	 */
 	private void executeMainToSavingTransfer(Long fromAccountId, Long toAccountId, Long amount) {
-		MainAccount refreshedFromAccount = mainAccountService.getRefreshedAccount(fromAccountId);
-		SavingAccount refreshedToAccount = savingAccountService.getRefreshedAccount(toAccountId);
+		MainAccount refreshedFromAccount = mainAccountService.findById(fromAccountId);
+		SavingAccount refreshedToAccount = savingAccountService.findById(toAccountId);
 
 		// 송금 실행 (재시도 로직 포함)
 		retryExecutor.executeWithRetry(() -> {
-			transferService.transferInNewTransaction(refreshedFromAccount, refreshedToAccount, amount);
+			transferService.transfer(refreshedFromAccount, refreshedToAccount, amount);
 			log.debug("일반 계좌에서 적금 계좌로 송금 완료: {} -> {}, 금액: {}",
 				refreshedFromAccount.getAccountNumber(),
 				refreshedToAccount.getAccountNumber(),
