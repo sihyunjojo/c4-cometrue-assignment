@@ -1,4 +1,4 @@
-package org.c4marathon.assignment.model.policy;
+package org.c4marathon.assignment.policy;
 
 import org.c4marathon.assignment.enums.AccountType;
 
