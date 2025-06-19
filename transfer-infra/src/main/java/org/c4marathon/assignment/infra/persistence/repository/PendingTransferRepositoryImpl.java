@@ -1,9 +1,10 @@
-package org.c4marathon.assignment.domain.repository;
+package org.c4marathon.assignment.infra.persistence.repository;
 
 import org.c4marathon.assignment.domain.model.Member;
 import org.c4marathon.assignment.domain.model.PendingTransfer;
-import org.c4marathon.assignment.infra.persistence.jpa.JpaPendingTransferRepository;
-import org.c4marathon.assignment.infra.persistence.query.PendingTransferQueryRepository;
+import org.c4marathon.assignment.domain.repository.PendingTransferRepository;
+import org.c4marathon.assignment.infra.persistence.repository.jpa.JpaPendingTransferRepository;
+import org.c4marathon.assignment.infra.persistence.repository.query.PendingTransferQueryRepository;
 import org.springframework.stereotype.Repository;
 
 import lombok.RequiredArgsConstructor;
@@ -42,6 +43,6 @@ public class PendingTransferRepositoryImpl implements PendingTransferRepository 
 
     @Override
     public Map<Member, List<PendingTransfer>> findRemindTargetGroupedByMember(LocalDateTime remindTime) {
-        return query.findRemindTargetGroupedByMember(remindTime);
+		return query.findRemindTargetGroupedByMember(remindTime);
     }
 }

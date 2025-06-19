@@ -1,10 +1,11 @@
-package org.c4marathon.assignment.domain.repository;
+package org.c4marathon.assignment.infra.persistence.repository;
 
 import java.util.List;
 import java.util.Optional;
 
 import org.c4marathon.assignment.domain.model.SavingAccount;
-import org.c4marathon.assignment.infra.persistence.jpa.JpaSavingAccountRepository;
+import org.c4marathon.assignment.domain.repository.SavingAccountRepository;
+import org.c4marathon.assignment.infra.persistence.repository.jpa.JpaSavingAccountRepository;
 import org.springframework.stereotype.Repository;
 
 import lombok.RequiredArgsConstructor;
