@@ -1,4 +1,4 @@
-package org.c4marathon.assignment.infra.persistence.jpa;
+package org.c4marathon.assignment.infra.persistence.repository.jpa;
 
 import java.time.LocalDateTime;
 import java.util.List;
