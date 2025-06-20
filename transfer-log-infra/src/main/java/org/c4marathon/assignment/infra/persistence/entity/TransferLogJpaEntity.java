@@ -47,8 +47,10 @@ public class TransferLogJpaEntity extends BaseTimeEntity {
 	@Enumerated(EnumType.STRING)
 	private TransferStatus status;
 
+	@Column(name = "send_time")
 	private LocalDateTime sendTime;
 
+	@Column(name = "receiver_time")
 	private LocalDateTime receiverTime;
 
 	// static 메서드로 변환 로직 제공
