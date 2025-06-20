@@ -12,9 +12,8 @@ public class MemberService {
 
 	private final MemberRepository memberRepository;
 
-	public Member registerember(Member member) {
-		memberRepository.save(member);
-		return member;
+	public Member registerMemer(Member member) {
+		return memberRepository.save(member);
 	}
 
 }
