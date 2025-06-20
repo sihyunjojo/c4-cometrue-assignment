@@ -12,9 +12,9 @@ spring:
 
   config:
     import:
-      - classpath:main-account-policy.yml
-      - classpath:saving-account-policy.yml
-      - classpath:transfer-transaction-policy.yml
+      - optional:file:main-account-infra/src/main/resources/main-account-policy.yml
+      - optional:file:saving-account-infra/src/main/resources/saving-account-policy.yml
+      - optional:file:transfer-infra/src/main/resources/transfer-transaction-policy.yml
 
 # java -XX:+PrintFlagsFinal -version # JVM이 사용하는 내부 설정값(Flags)을 전부 출력
 # 기본 JVM 메모리 설정: -Xms = 약 256MB, -Xmx = 약 4GB (전체의 1/4)
