@@ -63,14 +63,14 @@ public class SavingAccountUseCase {
 			transferLogService.saveTransferLog(chargeLog);
 		}
 
-		Callable<Void> performDeposit = () -> {
+		Callable<Boolean> performTransfer = () -> {
 			var fromAccount = mainAccountService.findByIdWithoutSecondCache(mainAccountId);
 			var toAccount = savingAccountService.findByIdWithoutSecondCache(savingAccountId);
 			transferService.transfer(fromAccount, toAccount, amount);
-			return null;
+			return true;
 		};
 
-		retryExecutor.executeWithRetry(performDeposit);
+		retryExecutor.executeWithRetry(performTransfer);
 
 		MainAccount fromAccount = mainAccountService.findById(mainAccountId);
 		SavingAccount toAccount = savingAccountService.findById(savingAccountId);
@@ -125,11 +125,11 @@ public class SavingAccountUseCase {
 		final long amount = savingAccount.getSubscribedDepositAmount();
 
 		try {
-			Callable<Void> performTransfer = () -> {
+			Callable<Boolean> performTransfer = () -> {
 				var from = mainAccountService.findByIdWithoutSecondCache(fromAccountId);
 				var to = savingAccountService.findByIdWithoutSecondCache(toAccountId);
 				transferService.transfer(from, to, amount);
-				return null;
+				return true;
 			};
 
 			retryExecutor.executeWithRetry(performTransfer);
