@@ -1,8 +1,8 @@
 <configuration>
-    <property name="LOG_FILE" value="application.log"/>
+    <property name="LOG_FILE" value="log/application.log"/>
 
     <appender name="LOGSTASH" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
-        <destination>localhost:5044</destination>
+        <destination>172.22.0.4:5044</destination>
         <encoder class="net.logstash.logback.encoder.LogstashEncoder"/>
     </appender>
 
@@ -15,7 +15,7 @@
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${LOG_FILE}</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>application.%d{yyyy-MM-dd_HH-mm}.log</fileNamePattern>
+            <fileNamePattern>log/application.%d{yyyy-MM-dd_HH-mm}.log</fileNamePattern>
             <maxHistory>5</maxHistory>
         </rollingPolicy>
         <encoder>
