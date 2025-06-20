@@ -43,14 +43,21 @@ public class PendingTransferJpaEntity extends BaseTimeEntity {
 	private MainAccountJpaEntity toMainAccount;
 
 	public PendingTransfer toDomain() {
-		return PendingTransfer.to(
-			id, 
-			amount, 
-			type, 
-			status, 
-			expiredAt, 
-			fromMainAccount != null ? fromMainAccount.getId() : null, 
-			toMainAccount != null ? toMainAccount.getId() : null
-		);
+		return PendingTransfer.of(id, amount, type, status, expiredAt,
+			fromMainAccount != null ? fromMainAccount.getId() : null,
+			toMainAccount != null ? toMainAccount.getId() : null, getCreatedAt(), getUpdatedAt());
+	}
+
+	public static PendingTransferJpaEntity fromDomain(PendingTransfer domain, MainAccountJpaEntity fromAccount,
+		MainAccountJpaEntity toAccount) {
+		return PendingTransferJpaEntity.builder()
+			.id(domain.getId())
+			.amount(domain.getAmount())
+			.type(domain.getType())
+			.status(domain.getStatus())
+			.expiredAt(domain.getExpiredAt())
+			.fromMainAccount(fromAccount)
+			.toMainAccount(toAccount)
+			.build();
 	}
 }

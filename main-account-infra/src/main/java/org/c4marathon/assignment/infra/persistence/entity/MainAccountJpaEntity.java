@@ -25,10 +25,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
-@Table(name = "main_account", uniqueConstraints = {
-	@UniqueConstraint(columnNames = "account_number"),
-	@UniqueConstraint(columnNames = "member_id")
-})
+@Table(name = "main_account",
+	uniqueConstraints = {@UniqueConstraint(columnNames = "account_number"), @UniqueConstraint(columnNames = "member_id")})
 public class MainAccountJpaEntity extends BaseTimeEntity {
 
 	@Id
@@ -49,17 +47,18 @@ public class MainAccountJpaEntity extends BaseTimeEntity {
 	private Long version;
 
 	public MainAccount toDomain() {
-		return MainAccount.to(id, accountNumber, balance, dailyChargeAmount, member.getId(), version);
+		return MainAccount.of(id, accountNumber, balance, dailyChargeAmount, member != null ? member.getId() : null,
+			version, super.getCreatedAt(), super.getUpdatedAt());
 	}
 
-	// public static MainAccountJpaEntity fromDomain(MainAccount domain) {
-	// 	return MainAccountJpaEntity.builder()
-	// 		.id(domain.getId())
-	// 		.accountNumber(domain.getAccountNumber())
-	// 		.balance(domain.getBalance())
-	// 		.dailyChargeAmount(domain.getDailyChargeAmount())
-	// 		.member(domain.getMemberId())
-	// 		.version(domain.getVersion())
-	// 		.build();
-	// }
+	public static MainAccountJpaEntity fromDomain(MainAccount domain, MemberJpaEntity member) {
+		return MainAccountJpaEntity.builder()
+			.id(domain.getId())
+			.accountNumber(domain.getAccountNumber())
+			.balance(domain.getBalance())
+			.dailyChargeAmount(domain.getDailyChargeAmount())
+			.member(member) // MemberJpaEntity 객체 직접 주입
+			.version(domain.getVersion())
+			.build();
+	}
 }

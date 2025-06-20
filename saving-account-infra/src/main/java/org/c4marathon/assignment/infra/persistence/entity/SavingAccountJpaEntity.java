@@ -12,9 +12,7 @@ import org.c4marathon.assignment.model.BaseTimeEntity;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
-@Table(name = "saving_account", uniqueConstraints = {
-	@UniqueConstraint(columnNames = "account_number")
-})
+@Table(name = "saving_account", uniqueConstraints = {@UniqueConstraint(columnNames = "account_number")})
 public class SavingAccountJpaEntity extends BaseTimeEntity {
 
 	@Id
@@ -31,28 +29,32 @@ public class SavingAccountJpaEntity extends BaseTimeEntity {
 	@Column(nullable = false)
 	private SavingType savingType;
 
-	@Column(name = "member_id", nullable = false)
-	private Long memberId;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "member_id", nullable = false)
+	private MemberJpaEntity member;
 
-	@Column(name = "main_account_id")
-	private Long mainAccountId;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "main_account_id")
+	private MainAccountJpaEntity mainAccount;
 
 	@Version
 	private Long version;
 
 	public SavingAccount toDomain() {
-		return new SavingAccount(id, accountNumber, balance, subscribedDepositAmount, savingType, memberId, mainAccountId, version);
+		return SavingAccount.of(id, accountNumber, balance, subscribedDepositAmount, savingType, member.getId(),
+			mainAccount.getId(), version, getCreatedAt(), getUpdatedAt());
 	}
 
-	public static SavingAccountJpaEntity fromDomain(SavingAccount domain) {
+	public static SavingAccountJpaEntity fromDomain(SavingAccount domain, MemberJpaEntity member,
+		MainAccountJpaEntity mainAccount) {
 		return SavingAccountJpaEntity.builder()
 			.id(domain.getId())
 			.accountNumber(domain.getAccountNumber())
 			.balance(domain.getBalance())
 			.subscribedDepositAmount(domain.getSubscribedDepositAmount())
 			.savingType(domain.getSavingType())
-			.memberId(domain.getMemberId())
-			.mainAccountId(domain.getMainAccountId())
+			.member(member)
+			.mainAccount(mainAccount)
 			.version(domain.getVersion())
 			.build();
 	}

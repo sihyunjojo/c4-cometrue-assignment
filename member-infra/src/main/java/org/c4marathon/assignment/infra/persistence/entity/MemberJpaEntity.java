@@ -34,6 +34,6 @@ public class MemberJpaEntity extends BaseTimeEntity {
 	}
 
 	public Member toDomain() {
-		return Member.to(id, name, email, password);
+		return Member.of(id, name, email, password, super.getCreatedAt(), super.getUpdatedAt());
 	}
 }
