@@ -28,8 +28,8 @@ server:
   port: 8080
   tomcat:
     threads:
-      max: 400 # (사용자 기준)
-      min-spare: 75 # max의 10~25%가 일반적인 기준입니다.
+      max: 50 # 400 # (사용자 기준)
+      min-spare: 5 # 75 # max의 10~25%가 일반적인 기준입니다.
 
 
 springdoc:
@@ -38,7 +38,7 @@ springdoc:
 
 logging:
   level:
-    root: info
+    root: Info
 #    org:
 #      hibernate:
 #        engine:
