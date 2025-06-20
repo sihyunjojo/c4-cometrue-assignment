@@ -18,8 +18,8 @@ import lombok.ToString;
 @EqualsAndHashCode
 @AllArgsConstructor
 public class TransferLog {
-    private final Long id;
-    private final Long parentTransferTransactionId;
+    private Long id;
+    private Long parentTransferTransactionId;
     private final AccountSnapshot from;
     private final AccountSnapshot to;
     private final long amount;
@@ -30,7 +30,9 @@ public class TransferLog {
     private final LocalDateTime createdAt;
     private final LocalDateTime updatedAt;
 
-    public static TransferLog of(Long id, Long parentTransferTransactionId, AccountSnapshot from, AccountSnapshot to, long amount, TransferType type, TransferStatus status, LocalDateTime sendTime, LocalDateTime receiverTime) {
+    public static TransferLog of(Long id, Long parentTransferTransactionId, AccountSnapshot from, AccountSnapshot to, 
+                               long amount, TransferType type, TransferStatus status, LocalDateTime sendTime, 
+                               LocalDateTime receiverTime, LocalDateTime createdAt, LocalDateTime updatedAt) {
         return TransferLog.builder()
             .id(id)
             .parentTransferTransactionId(parentTransferTransactionId)
@@ -41,6 +43,8 @@ public class TransferLog {
             .status(status)
             .sendTime(sendTime)
             .receiverTime(receiverTime)
+            .createdAt(createdAt)
+            .updatedAt(updatedAt)
             .build();
     }
 }

@@ -16,22 +16,16 @@ public class Member {
 	private final LocalDateTime createdAt;
 	private final LocalDateTime updatedAt;
 
-
-	public static Member register(String name, String email, String password) {
-		return new Member(null, name, email, password);
+	public static Member of(String name, String email, String password) {
+		return new Member(null, name, email, password, null, null);
 	}
 
-	public static Member to(Long id, String name, String email, String password) {
-		return new Member(id, name, email, password);
-	}
+	public static Member of(Long id, String name, String email, String password) {
+        return new Member(id, name, email, password, null, null);
+    }
 
-	private Member(Long id, String name, String email, String password) {
-		this.id = id;
-		this.name = name;
-		this.email = email;
-		this.password = password;
-		this.createdAt = null;
-		this.updatedAt = null;
-	}
+    public static Member of(Long id, String name, String email, String password, LocalDateTime createdAt, LocalDateTime updatedAt) {
+        return new Member(id, name, email, password, createdAt, updatedAt);
+    }
 
 }

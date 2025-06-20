@@ -28,8 +28,12 @@ public class MainAccount implements Account {
 		return new MainAccount(null, accountNumber, 0L, 0L, memberId, null);
 	}
 
-	public static MainAccount to(Long id, String accountNumber, Long balance, Long dailyChargeAmount, Long memberId, Long version) {
+	public static MainAccount of(Long id, String accountNumber, Long balance, Long dailyChargeAmount, Long memberId, Long version) {
 		return new MainAccount(id, accountNumber, balance, dailyChargeAmount, memberId, version);
+	}
+
+	public static MainAccount of(Long id, String accountNumber, Long balance, Long dailyChargeAmount, Long memberId, Long version, LocalDateTime createdAt, LocalDateTime updatedAt) {
+		return new MainAccount(id, accountNumber, balance, dailyChargeAmount, memberId, version, createdAt, updatedAt);
 	}
 
 	private MainAccount(Long id, String accountNumber, Long balance, Long dailyChargeAmount, Long memberId, Long version) {
