@@ -116,7 +116,7 @@ public class TransferUseCase {
 				refreshedFromAccount.getAccountNumber(),
 				refreshedToAccount.getAccountNumber(),
 				amount);
-			return null;
+			return true;
 		});
 
 		// 송금 성공 시 로그 생성
@@ -139,7 +139,7 @@ public class TransferUseCase {
 				refreshedFromAccount.getAccountNumber(),
 				refreshedToAccount.getAccountNumber(),
 				amount);
-			return null;
+			return true;
 		});
 
 		// 송금 성공 시 로그 생성
