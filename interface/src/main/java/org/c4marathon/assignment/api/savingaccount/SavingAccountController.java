@@ -1,6 +1,7 @@
 package org.c4marathon.assignment.api.savingaccount;
 
 import org.c4marathon.assignment.api.savingaccount.dto.CreateFixedSavingAccountRequestDto;
+import org.c4marathon.assignment.api.savingaccount.dto.DepositRequest;
 import org.c4marathon.assignment.api.savingaccount.dto.SavingAccountResponseDto;
 import org.c4marathon.assignment.response.ApiResponse;
 import org.c4marathon.assignment.usecase.savingaccount.SavingAccountUseCase;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -24,7 +26,7 @@ public class SavingAccountController {
 	@Operation(summary = "정기 적금 추가", description = "정기 적금 계좌를 생성하는 API입니다.")
 	@PostMapping("/fixed")
 	public ResponseEntity<ApiResponse<SavingAccountResponseDto>> createFixedSavingAccount(@RequestParam Long memberId, @RequestBody
-	CreateFixedSavingAccountRequestDto request) {
+	@Valid CreateFixedSavingAccountRequestDto request) {
 		SavingAccountResponseDto savingAccount = savingAccountUseCase.registerFixedSavingAccount(memberId, request);
 		return ResponseEntity.status(201)
 			.body(ApiResponse.res(201, "정기 적금 계좌 생성 완료", savingAccount));
@@ -40,8 +42,8 @@ public class SavingAccountController {
 
 	@Operation(summary = "자신의 메인 계좌를 통한 적금 계좌 입금", description = "자신의 메인 계좌를 통한 적금 계좌 입금하는 API입니다.")
 	@PostMapping("/deposit")
-	public ResponseEntity<ApiResponse<String>> deposit(@RequestParam Long savingAccountId, @RequestParam Long amount) {
-		savingAccountUseCase.deposit(savingAccountId, amount);
+	public ResponseEntity<ApiResponse<String>> deposit(@RequestBody @Valid DepositRequest request) {
+		savingAccountUseCase.deposit(request.savingAccountId(), request.amount());
 		return ResponseEntity.status(200)
 			.body(ApiResponse.res(200, "입금 완료"));
 	}
