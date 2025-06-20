@@ -39,7 +39,7 @@ public class PendingTransferService {
 		MainAccount toAccount = mainAccountRepository.findById(toAccountId)
 			.orElseThrow(() -> new IllegalArgumentException("메인 계좌가 존재하지 않음"));
 
-		PendingTransfer tx = PendingTransfer.createPending(fromAccountId, toAccountId, amount,
+		PendingTransfer tx = PendingTransfer.of(fromAccountId, toAccountId, amount,
 			pendingTransferPolicy.getPendingTransferExpireAfterDurationHours());
 
 		pendingTransferRepository.save(tx);
