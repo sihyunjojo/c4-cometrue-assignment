@@ -46,7 +46,7 @@ public class PendingTransferQueryRepositoryImpl implements PendingTransferQueryR
                         // MainAccountJpaEntity의 MemberJpaEntity를 가져와 도메인 모델로 변환
                         return pendingTransfer.getToMainAccount().getMember().toDomain();
                     } catch (Exception e) {
-                        throw new RuntimeException("Member 조회 중 오류 발생", e);
+                        throw new RuntimeException("회원 조회 중 오류가 발생했습니다.", e);
                     }
                 },
                 Collectors.mapping(PendingTransferJpaEntity::toDomain, Collectors.toList())
