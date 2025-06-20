@@ -8,9 +8,11 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.jpa.repository.QueryHints;
 import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
 import jakarta.persistence.QueryHint;
 
+@Repository
 public interface JpaMainAccountRepository extends JpaRepository<MainAccountJpaEntity, Long> {
 	// @Lock(LockModeType.PESSIMISTIC_WRITE) // 비관적 락
 	// DB에서 MainAccountJpaEntity 테이블의 모든 컬럼을 가져옵니다.
