@@ -296,14 +296,14 @@ project(':app') {
         implementation "org.springframework.boot:spring-boot-starter-data-jpa"
 
         // Test Dependencies
-        testImplementation platform("org.springframework.boot:spring-boot-dependencies")
-        testImplementation 'org.springframework.boot:spring-boot-starter-test'
-        testImplementation "org.junit.jupiter:junit-jupiter:${junitJupiterVersion}"
-        testImplementation "org.assertj:assertj-core:${assertjVersion}"
-
-        // Lombok for test
-        testCompileOnly "org.projectlombok:lombok:${lombokVersion}"
-        testAnnotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+//        testImplementation platform("org.springframework.boot:spring-boot-dependencies")
+//        testImplementation 'org.springframework.boot:spring-boot-starter-test'
+//        testImplementation "org.junit.jupiter:junit-jupiter:${junitJupiterVersion}"
+//        testImplementation "org.assertj:assertj-core:${assertjVersion}"
+//
+//        // Lombok for test
+//        testCompileOnly "org.projectlombok:lombok:${lombokVersion}"
+//        testAnnotationProcessor "org.projectlombok:lombok:${lombokVersion}"
 
         implementation project(':main-account-domain')
         implementation project(':main-account-infra')
