@@ -63,20 +63,20 @@ public class TransferLogQueryRepositoryImpl implements TransferLogQueryRepositor
             .limit(size + 1)
             .fetch();
 
-        List<TransferLogJpaEntity> merged = Stream.concat(fromLogs.stream(), toLogs.stream())
-            .sorted(Comparator
-                .comparing((TransferLogJpaEntity log) ->
-                    accountNumber.equals(log.getFrom().getNumber()) ? log.getSendTime() : log.getReceiverTime()
-                )
-                .thenComparing(TransferLogJpaEntity::getId)
-            )
-            .limit(size + 1)
-            .toList();
+		List<TransferLogJpaEntity> allLogs = Stream.concat(fromLogs.stream(), toLogs.stream())
+			.sorted(Comparator
+				.comparing((TransferLogJpaEntity log) ->
+					accountNumber.equals(log.getFrom().getNumber()) ? log.getSendTime() : log.getReceiverTime()
+				)
+				.thenComparing(TransferLogJpaEntity::getId)
+			)
+			.limit(size + 1)
+			.toList();
 
-        boolean hasNext = merged.size() > size;
-        if (hasNext) {
-            merged = merged.subList(0, size);
-        }
+		boolean hasNext = allLogs.size() > size;
+		List<TransferLogJpaEntity> merged = hasNext
+			? allLogs.subList(0, size)
+			: allLogs;
 
         return new SliceImpl<>(merged, PageRequest.of(0, size), hasNext);
     }
