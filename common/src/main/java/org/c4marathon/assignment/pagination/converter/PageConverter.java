@@ -7,6 +7,10 @@ import org.springframework.data.domain.Pageable;
 
 public class PageConverter {
 
+	private PageConverter() {
+		// 유틸리티 클래스이므로 인스턴스화 방지
+	}
+
 	public static PageRequest toPageRequest(Pageable pageable) {
 		return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize());
 	}
