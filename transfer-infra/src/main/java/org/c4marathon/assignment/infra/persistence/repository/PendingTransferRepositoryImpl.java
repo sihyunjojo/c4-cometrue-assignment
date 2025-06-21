@@ -43,21 +43,21 @@ public class PendingTransferRepositoryImpl implements PendingTransferRepository 
     }
 
     @Override
-    public List<PendingTransfer> findRemindTargetsWithMainAccount(LocalDateTime time) {
-        return jpaPendingTransferRepository.findRemindPendingTargetTransactionsWithMainAccount(time).stream()
+    public List<PendingTransfer> findRemindTargetsWithMainAccount(LocalDateTime notificationReadyCutoffTime) {
+        return jpaPendingTransferRepository.findRemindPendingTargetTransactionsWithMainAccount(notificationReadyCutoffTime).stream()
             .map(PendingTransferJpaEntity::toDomain)
             .toList();
     }
 
     @Override
-    public List<PendingTransfer> findRemindTargetsWithMember(LocalDateTime time) {
-        return jpaPendingTransferRepository.findRemindPendingTargetTransactionsWithMember(time).stream()
+    public List<PendingTransfer> findRemindTargetsWithMember(LocalDateTime notificationReadyCutoffTime) {
+        return jpaPendingTransferRepository.findRemindPendingTargetTransactionsWithMember(notificationReadyCutoffTime).stream()
             .map(PendingTransferJpaEntity::toDomain)
             .toList();
     }
 
     @Override
-    public Map<Member, List<PendingTransfer>> findRemindTargetGroupedByMember(LocalDateTime remindTime) {
-        return query.findRemindTargetGroupedByMember(remindTime);
+    public Map<Member, List<PendingTransfer>> findRemindTargetGroupedByMember(LocalDateTime notificationReadyCutoffTime) {
+        return query.findRemindTargetGroupedByMember(notificationReadyCutoffTime);
     }
 }
