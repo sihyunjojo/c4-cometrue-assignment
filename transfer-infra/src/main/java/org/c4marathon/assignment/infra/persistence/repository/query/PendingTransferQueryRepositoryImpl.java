@@ -24,32 +24,28 @@ import lombok.RequiredArgsConstructor;
 @Transactional(readOnly = true)
 public class PendingTransferQueryRepositoryImpl implements PendingTransferQueryRepository {
 
-    private final JPAQueryFactory queryFactory;
+	private final JPAQueryFactory queryFactory;
 
-    @Override
-    public Map<Member, List<PendingTransfer>> findRemindTargetGroupedByMember(LocalDateTime remindTime) {
-        // 1. 만료된 PendingTransfer 조회 (QueryDSL 사용)
-        List<PendingTransferJpaEntity> pendingTransfers = queryFactory
-            .selectFrom(pendingTransferJpaEntity)
-            .join(pendingTransferJpaEntity.toMainAccount, mainAccountJpaEntity).fetchJoin()
-            .where(
-                pendingTransferJpaEntity.status.eq(TransferStatus.PENDING),
-                pendingTransferJpaEntity.expiredAt.loe(remindTime)
-            )
-            .fetch();
+	@Override
+	public Map<Member, List<PendingTransfer>> findRemindTargetGroupedByMember(LocalDateTime remindTime) {
+		// 1. 만료된 PendingTransfer 조회 (QueryDSL 사용)
+		List<PendingTransferJpaEntity> pendingTransfers = queryFactory
+			.selectFrom(pendingTransferJpaEntity)
+			.join(pendingTransferJpaEntity.toMainAccount, mainAccountJpaEntity).fetchJoin()
+			.join(mainAccountJpaEntity.member).fetchJoin()
+			.where(
+				pendingTransferJpaEntity.status.eq(TransferStatus.PENDING),
+				pendingTransferJpaEntity.expiredAt.loe(remindTime)
+			)
+			.fetch();
 
-        // 2. Member 기준으로 그룹화
-        return pendingTransfers.stream()
-            .collect(Collectors.groupingBy(
-                pendingTransfer -> {
-                    try {
-                        // MainAccountJpaEntity의 MemberJpaEntity를 가져와 도메인 모델로 변환
-                        return pendingTransfer.getToMainAccount().getMember().toDomain();
-                    } catch (Exception e) {
-                        throw new RuntimeException("회원 조회 중 오류가 발생했습니다.", e);
-                    }
-                },
-                Collectors.mapping(PendingTransferJpaEntity::toDomain, Collectors.toList())
-            ));
-    }
+		// 2. Member 기준으로 그룹화
+		return pendingTransfers.stream()
+			.collect(Collectors.groupingBy(
+				pendingTransfer -> {
+					return pendingTransfer.getToMainAccount().getMember().toDomain();
+				},
+				Collectors.mapping(PendingTransferJpaEntity::toDomain, Collectors.toList())
+			));
+	}
 }
