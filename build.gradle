@@ -45,7 +45,6 @@ subprojects {
 
 def slf4jDependencies(Project project) {
     project.dependencies {
-        implementation("org.slf4j:slf4j-api:2.0.17")
         implementation "org.slf4j:slf4j-api:${slf4jVersion}"
     }
 }
