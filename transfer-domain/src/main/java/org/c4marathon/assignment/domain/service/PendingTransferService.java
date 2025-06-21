@@ -47,7 +47,7 @@ public class PendingTransferService {
 	}
 
 	public Boolean accept(Long transactionId) {
-		PendingTransfer tx = pendingTransferRepository.findPendingPendingTransferById(transactionId)
+		PendingTransfer tx = pendingTransferRepository.findPendingTransferById(transactionId)
 			.orElseThrow(() -> new IllegalArgumentException("대기 중인 거래가 존재하지 않음"));
 
 		MainAccount toAccount = mainAccountRepository.findById(tx.getToMainAccountId())
@@ -66,7 +66,7 @@ public class PendingTransferService {
 	}
 
 	public Boolean cancel(Long transactionId) {
-		PendingTransfer tx = pendingTransferRepository.findPendingPendingTransferById(transactionId)
+		PendingTransfer tx = pendingTransferRepository.findPendingTransferById(transactionId)
 			.orElseThrow(() -> new IllegalArgumentException("대기 중인 거래가 존재하지 않음"));
 
 		MainAccount fromAccount = mainAccountRepository.findById(tx.getFromMainAccountId())
@@ -100,7 +100,7 @@ public class PendingTransferService {
 	}
 
 	public PendingTransfer findPendingTransfer(Long transactionId) {
-		return pendingTransferRepository.findPendingPendingTransferById(transactionId)
+		return pendingTransferRepository.findPendingTransferById(transactionId)
 				.orElseThrow(() -> new IllegalArgumentException("대기 중인 거래가 존재하지 않음"));
 	}
 

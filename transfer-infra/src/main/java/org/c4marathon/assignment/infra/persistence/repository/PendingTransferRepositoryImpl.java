@@ -37,8 +37,8 @@ public class PendingTransferRepositoryImpl implements PendingTransferRepository 
     }
     
     @Override
-    public Optional<PendingTransfer> findPendingPendingTransferById(Long transactionId) {
-        return jpaPendingTransferRepository.findPendingPendingTransferById(transactionId)
+    public Optional<PendingTransfer> findPendingTransferById(Long transactionId) {
+        return jpaPendingTransferRepository.findPendingTransferById(transactionId)
             .map(PendingTransferJpaEntity::toDomain);
     }
 

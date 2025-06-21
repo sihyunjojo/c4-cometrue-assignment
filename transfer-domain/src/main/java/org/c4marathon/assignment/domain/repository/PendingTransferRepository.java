@@ -11,7 +11,7 @@ import java.util.Optional;
 public interface PendingTransferRepository  {
     void save(PendingTransfer entity);
     
-    Optional<PendingTransfer> findPendingPendingTransferById(Long transactionId);
+    Optional<PendingTransfer> findPendingTransferById(Long transactionId);
     
     List<PendingTransfer> findRemindTargetsWithMainAccount(LocalDateTime time);
     

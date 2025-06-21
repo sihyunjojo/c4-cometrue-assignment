@@ -14,7 +14,7 @@ import org.springframework.stereotype.Repository;
 public interface JpaPendingTransferRepository extends JpaRepository<PendingTransferJpaEntity, Long> {
     // JPA의 전체 흐름과 책임 체계 따름
     @Query("SELECT t FROM PendingTransferJpaEntity t WHERE t.id = :toAccountId AND t.status = 'PENDING'")
-    Optional<PendingTransferJpaEntity> findPendingPendingTransferById(@Param("toAccountId") Long toAccountId);
+    Optional<PendingTransferJpaEntity> findPendingTransferById(@Param("toAccountId") Long toAccountId);
 
     @Query("SELECT t FROM PendingTransferJpaEntity t LEFT JOIN t.toMainAccount m WHERE t.status = 'PENDING' AND t.expiredAt <= :remindTime")
     List<PendingTransferJpaEntity> findRemindPendingTargetTransactionsWithMainAccount(@Param("remindTime") LocalDateTime remindTime);
