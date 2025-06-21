@@ -21,18 +21,18 @@ public record TransferLogDto(
 	LocalDateTime updatedAt
 ) {
 	public static TransferLogDto from(TransferLog log) {
-		return new TransferLogDto(
-			log.getId(),
-			log.getParentTransferTransactionId(),
-			AccountSnapshotDto.from(log.getFrom()),
-			AccountSnapshotDto.from(log.getTo()),
-			log.getAmount(),
-			log.getTo().number(),
-			log.getStatus().name(),
-			log.getSendTime(),
-			log.getReceiverTime(),
-			log.getCreatedAt(),
-			log.getUpdatedAt()
-		);
+		return TransferLogDto.builder()
+			.id(log.getId())
+			.parentTransactionId(log.getParentTransferTransactionId())
+			.from(AccountSnapshotDto.from(log.getFrom()))
+			.to(AccountSnapshotDto.from(log.getTo()))
+			.amount(log.getAmount())
+			.type(log.getType().name())
+			.status(log.getStatus().name())
+			.sendTime(log.getSendTime())
+			.receiverTime(log.getReceiverTime())
+			.createdAt(log.getCreatedAt())
+			.updatedAt(log.getUpdatedAt())
+			.build();
 	}
 }
