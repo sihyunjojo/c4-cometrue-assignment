@@ -28,6 +28,7 @@ subprojects {
     }
 
     lombokDependencies(project)
+    slf4jDependencies(project)
 
     // ✅ Checkstyle
     checkstyle {
@@ -42,6 +43,12 @@ subprojects {
     }
 }
 
+def slf4jDependencies(Project project) {
+    project.dependencies {
+        implementation("org.slf4j:slf4j-api:2.0.17")
+        implementation "org.slf4j:slf4j-api:${slf4jVersion}"
+    }
+}
 def lombokDependencies(Project project) {
     project.dependencies {
         compileOnly "org.projectlombok:lombok:${lombokVersion}"
@@ -174,7 +181,7 @@ project(':transfer-log-infra') {
 //---- 🌟 Domain Layer ----
 project(':member-domain') {
     dependencies {
-        implementation 'org.springframework.boot:spring-boot-starter-web'
+        implementation 'org.springframework:spring-context'
 
         implementation project(':common')
     }
@@ -182,7 +189,7 @@ project(':member-domain') {
 
 project(':main-account-domain') {
     dependencies {
-        implementation 'org.springframework.boot:spring-boot-starter-web'
+        implementation 'org.springframework:spring-context'
 
         implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
         implementation project(':member-domain')
@@ -192,7 +199,7 @@ project(':main-account-domain') {
 
 project(':saving-account-domain') {
     dependencies {
-        implementation 'org.springframework.boot:spring-boot-starter-web'
+        implementation 'org.springframework:spring-context'
 
         implementation project(':main-account-domain')
         implementation project(':member-domain')
@@ -202,15 +209,14 @@ project(':saving-account-domain') {
 
 project(':settlement-domain') {
     dependencies {
-        implementation 'org.springframework.boot:spring-boot-starter-web'
-
+        implementation 'org.springframework:spring-context'
         implementation project(':common')
     }
 }
 
 project(':transfer-domain') {
     dependencies {
-        implementation 'org.springframework.boot:spring-boot-starter-web'
+        implementation 'org.springframework:spring-context'
         implementation "org.springframework.boot:spring-boot-starter-data-jpa" // jakarta.persistenc 예외
 
         implementation project(':member-domain')
@@ -222,7 +228,7 @@ project(':transfer-domain') {
 
 project(':transfer-log-domain') {
     dependencies {
-        implementation 'org.springframework.boot:spring-boot-starter-web'
+        implementation 'org.springframework:spring-context'
 
         implementation project(':common')
     }
@@ -230,7 +236,7 @@ project(':transfer-log-domain') {
 
 project(':reminder') {
     dependencies {
-        implementation 'org.springframework.boot:spring-boot-starter-web'
+        implementation 'org.springframework:spring-context'
 
         implementation project(':member-domain')
         implementation project(':transfer-domain')
