@@ -25,26 +25,34 @@ public class MainAccount implements Account {
 
 	public static MainAccount create(String accountNumber, Long memberId) {
 		if (memberId == null) throw new IllegalArgumentException("회원 ID는 필수입니다.");
-		return new MainAccount(null, accountNumber, 0L, 0L, memberId, null);
+		return MainAccount.builder()
+			.accountNumber(accountNumber)
+			.memberId(memberId)
+			.build();
 	}
 
 	public static MainAccount of(Long id, String accountNumber, Long balance, Long dailyChargeAmount, Long memberId, Long version) {
-		return new MainAccount(id, accountNumber, balance, dailyChargeAmount, memberId, version);
+		return MainAccount.builder()
+			.id(id)
+			.accountNumber(accountNumber)
+			.balance(balance)
+			.dailyChargeAmount(dailyChargeAmount)
+			.memberId(memberId)
+			.version(version)
+			.build();
 	}
 
 	public static MainAccount of(Long id, String accountNumber, Long balance, Long dailyChargeAmount, Long memberId, Long version, LocalDateTime createdAt, LocalDateTime updatedAt) {
-		return new MainAccount(id, accountNumber, balance, dailyChargeAmount, memberId, version, createdAt, updatedAt);
-	}
-
-	private MainAccount(Long id, String accountNumber, Long balance, Long dailyChargeAmount, Long memberId, Long version) {
-		this.id = id;
-		this.accountNumber = accountNumber;
-		this.balance = balance;
-		this.dailyChargeAmount = dailyChargeAmount;
-		this.memberId = memberId;
-		this.version = version;
-		createdAt = null;
-		updatedAt = null;
+		return MainAccount.builder()
+			.id(id)
+			.accountNumber(accountNumber)
+			.balance(balance)
+			.dailyChargeAmount(dailyChargeAmount)
+			.memberId(memberId)
+			.version(version)
+			.createdAt(createdAt)
+			.updatedAt(updatedAt)
+			.build();
 	}
 
 	public AccountType getType() {
