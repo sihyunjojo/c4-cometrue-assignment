@@ -19,12 +19,17 @@ public class PageResult<T> {
 	private final int totalPages;
 
 	public static <T> PageResult<T> of(List<T> contents, int pageNumber, int pageSize, long totalElements) {
-		Objects.requireNonNull(contents, "contents must not be null");
+		if (pageSize <= 0) {
+			throw new IllegalArgumentException("페이지 사이즈는 0보다 커야합니다.");
+		}
 		int totalPages = (int) Math.ceil((double) totalElements / pageSize);
 		return new PageResult<>(contents, pageNumber, pageSize, totalElements, totalPages);
 	}
 
 	public static <T> PageResult<T> empty(int pageNumber, int pageSize) {
+		if (pageSize <= 0) {
+			throw new IllegalArgumentException("페이지 사이즈는 0보다 커야합니다.");
+		}
 		return new PageResult<>(Collections.emptyList(), pageNumber, pageSize, 0, 0);
 	}
 	
