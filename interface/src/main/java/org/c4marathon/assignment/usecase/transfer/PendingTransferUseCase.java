@@ -2,8 +2,6 @@ package org.c4marathon.assignment.usecase.transfer;
 
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
-
 import org.c4marathon.assignment.domain.model.Member;
 import org.c4marathon.assignment.domain.model.MainAccount;
 import org.c4marathon.assignment.domain.model.PendingTransfer;
@@ -60,16 +58,16 @@ public class PendingTransferUseCase {
 		);
 
 		Account fromAccount = mainAccountService.findById(request.fromAccountId());
-		Account toAccount2 = mainAccountService.findById(request.toAccountId());
+		Account toAccount = mainAccountService.findById(request.toAccountId());
 		TransferLog immediateTransferLog = transferLogFactory.createPendingTransferLog(tx.getId(), fromAccount,
-				toAccount2, request.amount(), tx.getCreatedAt());
+				toAccount, request.amount(), tx.getCreatedAt());
 		transferLogService.saveTransferLog(immediateTransferLog);
 	}
 
 	@Transactional
 	public void acceptPendingTransfer(Long transactionId) {
 		// 대기 중인 거래 조회
-		PendingTransfer tx = pendingTransferService.findPendingPendingTransfer(transactionId);
+		PendingTransfer tx = pendingTransferService.findPendingTransfer(transactionId);
 
 		// 계좌 정보 조회
 		MainAccount fromAccount = mainAccountService.findById(tx.getFromMainAccountId());
@@ -91,7 +89,7 @@ public class PendingTransferUseCase {
 	@Transactional
 	public void cancelPendingTransfer(Long transactionId) {
 		// 대기 중인 거래 조회
-		PendingTransfer tx = pendingTransferService.findPendingPendingTransfer(transactionId);
+		PendingTransfer tx = pendingTransferService.findPendingTransfer(transactionId);
 
 		// 계좌 정보 조회
 		MainAccount fromAccount = mainAccountService.findById(tx.getFromMainAccountId());
@@ -110,12 +108,12 @@ public class PendingTransferUseCase {
 		transferLogService.saveTransferLog(transferLog);
 	}
 
-	// todo: 보상 로직 만들기
+	// todo: 보상 로직 만들기 (DLQ)
 	@Transactional
 	public void expirePendingTransfer() {
-		List<PendingTransfer> expiredPendingPendingTransfers = pendingTransferService.findAllByExpiredPendingPendingTransferWithMainAccount();
+		List<PendingTransfer> expiredPendingTransfers = pendingTransferService.findRemindPendingTransferWithMainAccount();
 
-		for (PendingTransfer tx : expiredPendingPendingTransfers) {
+		for (PendingTransfer tx : expiredPendingTransfers) {
 			pendingTransferService.expired(tx);
 
 			// 계좌 정보 조회

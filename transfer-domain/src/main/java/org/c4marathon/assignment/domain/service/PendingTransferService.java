@@ -99,7 +99,7 @@ public class PendingTransferService {
 		pendingTransferRepository.save(tx);
 	}
 
-	public PendingTransfer findPendingPendingTransfer(Long transactionId) {
+	public PendingTransfer findPendingTransfer(Long transactionId) {
 		return pendingTransferRepository.findPendingPendingTransferById(transactionId)
 				.orElseThrow(() -> new IllegalArgumentException("대기 중인 거래가 존재하지 않음"));
 	}
@@ -118,7 +118,7 @@ public class PendingTransferService {
 		return pendingTransferRepository.findRemindTargetsWithMember(remindTime);
 	}
 
-	public List<PendingTransfer> findAllByExpiredPendingPendingTransferWithMainAccount() {
+	public List<PendingTransfer> findRemindPendingTransferWithMainAccount() {
 		return pendingTransferRepository.findRemindTargetsWithMainAccount(LocalDateTime.now());
 	}
 }
