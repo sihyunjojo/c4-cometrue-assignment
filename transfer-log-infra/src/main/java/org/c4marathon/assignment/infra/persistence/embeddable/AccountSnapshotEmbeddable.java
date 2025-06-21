@@ -6,6 +6,7 @@ import jakarta.persistence.Enumerated;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
 import org.c4marathon.assignment.domain.model.vo.AccountSnapshot;
 import org.c4marathon.assignment.enums.AccountType;
 
@@ -26,10 +27,6 @@ public class AccountSnapshotEmbeddable {
 	}
 
 	public static AccountSnapshotEmbeddable fromDomain(AccountSnapshot snapshot) {
-		return new AccountSnapshotEmbeddable(
-			snapshot.id(),
-			snapshot.type(),
-			snapshot.number()
-		);
+		return new AccountSnapshotEmbeddable(snapshot.id(), snapshot.type(), snapshot.number());
 	}
 }

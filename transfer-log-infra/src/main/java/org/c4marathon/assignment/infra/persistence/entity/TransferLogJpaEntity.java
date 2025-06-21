@@ -53,18 +53,28 @@ public class TransferLogJpaEntity extends BaseTimeEntity {
 	@Column(name = "receiver_time")
 	private LocalDateTime receiverTime;
 
-	// static 메서드로 변환 로직 제공
 	public TransferLog toDomain() {
-		return TransferLog.of(id, parentTransferTransactionId, from.toDomain(), to.toDomain(), amount, type, status,
-			sendTime, receiverTime, getCreatedAt(), getUpdatedAt());
+		return TransferLog.of(
+			id,
+			parentTransferTransactionId,
+			from.toDomain(),
+			to.toDomain(),
+			amount,
+			type,
+			status,
+			sendTime,
+			receiverTime,
+			getCreatedAt() != null ? getCreatedAt() : LocalDateTime.now(),
+			getUpdatedAt() != null ? getUpdatedAt() : LocalDateTime.now()
+		);
 	}
 
 	public static TransferLogJpaEntity fromDomain(TransferLog domain) {
 		return TransferLogJpaEntity.builder()
 			.id(domain.getId())
 			.parentTransferTransactionId(domain.getParentTransferTransactionId())
-			.from(AccountSnapshotEmbeddable.fromDomain(domain.getFrom())) // 도메인 → Embeddable 변환
-			.to(AccountSnapshotEmbeddable.fromDomain(domain.getTo()))     // 도메인 → Embeddable 변환
+			.from(AccountSnapshotEmbeddable.fromDomain(domain.getFrom()))
+			.to(AccountSnapshotEmbeddable.fromDomain(domain.getTo()))
 			.amount(domain.getAmount())
 			.type(domain.getType())
 			.status(domain.getStatus())
