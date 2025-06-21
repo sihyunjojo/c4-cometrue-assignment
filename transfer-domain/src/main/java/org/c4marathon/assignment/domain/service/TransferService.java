@@ -27,7 +27,12 @@ public class TransferService {
 	}
 
 	private void withdraw(MainAccount from, Long amount) {
-		int withdrawResult = mainAccountRepository.withdrawByOptimistic(from.getId(), amount, from.getVersion());
+		if (from.getBalance() < amount) {
+			throw new IllegalArgumentException("잔액이 부족합니다.");
+		}
+		int withdrawResult = mainAccountRepository.withdrawByOptimistic(
+			from.getId(), amount, from.getVersion()
+		);
 
 		if (withdrawResult == 0) {
 			throw new OptimisticLockingFailureException("출금 처리 중 충돌이 발생했습니다.");
