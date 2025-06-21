@@ -21,7 +21,7 @@ public class MemberAccountUseCase {
 	public MainAccount registerMemberWithAccount(MemberRegistrationRequestDto request) {
 		Member member = Member.of(request.name(), request.email(), request.password());
 
-		member = memberService.registerMemer(member);
+		member = memberService.registerMember(member);
 		return mainAccountService.createMainAccountForMember(member);
 	}
 }

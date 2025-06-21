@@ -36,7 +36,7 @@ public class TransferLogUseCase {
 			? transferLogService.findAllBySendTimeAfterCursor(accountNumber, startAt, size)
 			: transferLogService.findAllBySendTimeAndIdAfterCursor(accountNumber, startAt, id, size);
 
-		return buildCursorPageResponse(slice.getContents(), slice.hasNext());
+		return buildCursorPageResponse(slice.getContents(), slice.isHasNext());
 	}
 
 	public TransferLogCursorPageResponseDto findAllByOffsetOrDefaultPaging(
