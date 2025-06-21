@@ -13,12 +13,12 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface JpaPendingTransferRepository extends JpaRepository<PendingTransferJpaEntity, Long> {
     // JPA의 전체 흐름과 책임 체계 따름
-    @Query("SELECT t FROM PendingTransferJpaEntity t WHERE t.id = :toAccountId AND t.status = 'PENDING'")
+    @Query("SELECT t FROM PendingTransferJpaEntity t WHERE t.id = :toAccountId AND t.status = org.c4marathon.assignment.enums.TransferStatus.PENDING")
     Optional<PendingTransferJpaEntity> findPendingTransferById(@Param("toAccountId") Long toAccountId);
 
-    @Query("SELECT t FROM PendingTransferJpaEntity t LEFT JOIN t.toMainAccount m WHERE t.status = 'PENDING' AND t.expiredAt <= :remindTime")
+    @Query("SELECT t FROM PendingTransferJpaEntity t LEFT JOIN t.toMainAccount m WHERE t.status = org.c4marathon.assignment.enums.TransferStatus.PENDING AND t.expiredAt <= :remindTime")
     List<PendingTransferJpaEntity> findRemindPendingTargetTransactionsWithMainAccount(@Param("remindTime") LocalDateTime remindTime);
 
-    @Query("SELECT t FROM PendingTransferJpaEntity t LEFT JOIN t.toMainAccount m LEFT JOIN m.member WHERE t.status = 'PENDING' AND t.createdAt <= :remindTime")
+    @Query("SELECT t FROM PendingTransferJpaEntity t LEFT JOIN t.toMainAccount m LEFT JOIN m.member WHERE t.status = org.c4marathon.assignment.enums.TransferStatus.PENDING AND t.createdAt <= :remindTime")
     List<PendingTransferJpaEntity> findRemindPendingTargetTransactionsWithMember(@Param("remindTime") LocalDateTime remindTime);
 }
