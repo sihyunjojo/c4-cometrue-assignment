@@ -23,8 +23,4 @@ public class SliceResult<T> {
 	public static <T> SliceResult<T> empty() {
 		return new SliceResult<>(Collections.emptyList(), false);
 	}
-
-	public boolean hasNext() {
-		return hasNext;
-	}
 }
