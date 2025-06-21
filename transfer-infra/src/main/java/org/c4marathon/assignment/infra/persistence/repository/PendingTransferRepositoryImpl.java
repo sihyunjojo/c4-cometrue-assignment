@@ -16,8 +16,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
-
 @Repository
 @RequiredArgsConstructor
 public class PendingTransferRepositoryImpl implements PendingTransferRepository {
@@ -48,14 +46,14 @@ public class PendingTransferRepositoryImpl implements PendingTransferRepository 
     public List<PendingTransfer> findRemindTargetsWithMainAccount(LocalDateTime time) {
         return jpaPendingTransferRepository.findRemindPendingTargetTransactionsWithMainAccount(time).stream()
             .map(PendingTransferJpaEntity::toDomain)
-            .collect(Collectors.toList());
+            .toList();
     }
 
     @Override
     public List<PendingTransfer> findRemindTargetsWithMember(LocalDateTime time) {
         return jpaPendingTransferRepository.findRemindPendingTargetTransactionsWithMember(time).stream()
             .map(PendingTransferJpaEntity::toDomain)
-            .collect(Collectors.toList());
+            .toList();
     }
 
     @Override

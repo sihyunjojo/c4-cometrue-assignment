@@ -2,8 +2,6 @@ package org.c4marathon.assignment.infra.persistence.repository;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
-
 import org.c4marathon.assignment.domain.model.SavingAccount;
 import org.c4marathon.assignment.domain.repository.SavingAccountRepository;
 import org.c4marathon.assignment.infra.persistence.entity.MainAccountJpaEntity;
@@ -33,14 +31,14 @@ public class SavingAccountRepositoryImpl implements SavingAccountRepository {
     public List<SavingAccount> findAll() {
         return jpaSavingAccountRepository.findAll().stream()
             .map(SavingAccountJpaEntity::toDomain)
-            .collect(Collectors.toList());
+            .toList();
     }
 
     @Override
     public List<SavingAccount> findAllFixedSavingAccountWithMainAccount() {
         return jpaSavingAccountRepository.findAllFixedSavingAccountWithMainAccount().stream()
             .map(SavingAccountJpaEntity::toDomain)
-            .collect(Collectors.toList());
+            .toList();
     }
 
     @Override

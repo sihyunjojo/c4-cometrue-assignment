@@ -2,8 +2,6 @@ package org.c4marathon.assignment.infra.persistence.repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
-
 import org.c4marathon.assignment.domain.model.TransferLog;
 import org.c4marathon.assignment.infra.persistence.entity.TransferLogJpaEntity;
 import org.springframework.stereotype.Repository;
@@ -44,7 +42,7 @@ public class TransferLogRepositoryImpl implements TransferLogRepository {
 
 		List<TransferLog> domainList = jpaSlice.getContent().stream()
 			.map(TransferLogJpaEntity::toDomain)
-			.collect(Collectors.toList());
+			.toList();
 
 		return SliceResult.of(
 			domainList,
@@ -60,7 +58,7 @@ public class TransferLogRepositoryImpl implements TransferLogRepository {
 
 		List<TransferLog> domainList = jpaSlice.getContent().stream()
 			.map(TransferLogJpaEntity::toDomain)
-			.collect(Collectors.toList());
+			.toList();
 
 		return SliceResult.of(
 			domainList,
@@ -82,7 +80,7 @@ public class TransferLogRepositoryImpl implements TransferLogRepository {
 		// Convert Page<TransferLogJpaEntity> to Page<TransferLog> before converting to PageResult
 		List<TransferLog> content = result.getContent().stream()
 			.map(TransferLogJpaEntity::toDomain)
-			.collect(Collectors.toList());
+			.toList();
 
 		// Create a new Page with the converted content
 		Page<TransferLog> domainPage = new PageImpl<>(
