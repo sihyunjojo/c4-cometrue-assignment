@@ -21,6 +21,7 @@
     <!-- ✅ 로컬 저장용 : 파일 출력 -->
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${LOG_FILE}</file> <!-- 위에서 사용한 LOG_FILE 즉, application.log 로 생성한다는 것 -->
+<!--        yyyy-MM-dd 00시 00분 01초 (또는 그 이후)에 첫 번째 로그 이벤트가 발생했을 때, 비로소 Logback은 롤링 작업을 시작-->
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <!-- rollingPolicy 는 어느정도의 주기를 가지고 새로운 파일을 생성할 것인지 rolling 을 한다고 표현 -->
             <!-- 예를 들어서 application.%d{yyyy-MM-dd_HH-mm}.log 이런 패턴이면 분단위로 롤링이 된다 이 패턴일 때 maxHistory가 5이면 5분단위 까지 기록 -->
