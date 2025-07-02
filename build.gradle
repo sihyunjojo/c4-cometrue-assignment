@@ -1,197 +1,324 @@
-//---- 🔌 플러그인 설정 ----
 plugins {
     id 'java'
-    id 'org.springframework.boot' version "${springBootVersion}"
-    id 'io.spring.dependency-management' version "${gradleDependencyManagementVersion}"
     id 'checkstyle'
+    id 'io.spring.dependency-management' version "${gradleDependencyManagementVersion}" apply false
+    id 'org.springframework.boot' version "${springBootVersion}" apply false
 }
 
-//---- 📦 모든 하위 프로젝트 공통 설정 ----
-allprojects {
+group = 'com.c4cometrue'
+
+subprojects {
     apply plugin: 'java'
     apply plugin: 'checkstyle'
     apply plugin: 'io.spring.dependency-management'
-    
-    // 루트 프로젝트에서는 bootJar, bootRun 비활성화
-    if (project == rootProject) {
-        bootJar {
-            enabled = false
-        }
-        bootRun {
-            enabled = false
-        }
-    }
 
     java {
-        sourceCompatibility = JavaVersion.valueOf("VERSION_${javaVersion}")
-        targetCompatibility = JavaVersion.valueOf("VERSION_${javaVersion}")
+        sourceCompatibility = JavaVersion.toVersion(javaVersion)
+        targetCompatibility = JavaVersion.toVersion(javaVersion)
     }
-
-    group = 'com.c4cometrue'
-    version = version
 
     repositories {
         mavenCentral()
     }
 
-    // 📏 Checkstyle 설정
+    dependencyManagement {
+        imports {
+            mavenBom "org.springframework.boot:spring-boot-dependencies:${springBootVersion}"
+        }
+    }
+
+    lombokDependencies(project)
+    slf4jDependencies(project)
+
+    // ✅ Checkstyle
     checkstyle {
         configFile = file("${rootDir}/naver-checkstyle.xml")
         configProperties = ["suppressionFile": "${rootDir}/naver-checkstyle-suppressions.xml"]
         toolVersion = checkstyleVersion
     }
 
-    // ✅ 테스트 설정
-    tasks.withType(Test) {
+    // ✅ JUnit 5 설정
+    tasks.withType(Test).configureEach {
         useJUnitPlatform()
     }
 }
 
-subprojects {
-    //---- QueryDSL 설정 ----
-    def querydslDir = layout.buildDirectory.dir("generated/querydsl").get().asFile
+def slf4jDependencies(Project project) {
+    project.dependencies {
+        implementation "org.slf4j:slf4j-api:${slf4jVersion}"
+    }
+}
+def lombokDependencies(Project project) {
+    project.dependencies {
+        compileOnly "org.projectlombok:lombok:${lombokVersion}"
+        annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+    }
+}
+
+
+// 데이터베이스 의존성 추가
+def databaseDependencies(Project project, String db = 'oracle') {
+    project.dependencies {
+        if (db == 'oracle') {
+            runtimeOnly "com.oracle.database.jdbc:ojdbc8:${oracleVersion}"
+        } else if (db == 'mysql') {
+            runtimeOnly "mysql:mysql-connector-java:${mysqlVersion}"
+        }
+    }
+}
+
+// QueryDSL 설정을 위한 공통 함수
+def configureQueryDsl(Project project) {
+    def querydslDir = project.layout.buildDirectory.dir("generated/querydsl").get().asFile
 
     sourceSets {
-        main.java.srcDirs += [ querydslDir ]
+        main {
+            java {
+                srcDir querydslDir
+            }
+        }
     }
 
-    configurations {
+    project.configurations {
         querydsl.extendsFrom compileClasspath
     }
 
-    tasks.withType(JavaCompile) {
-        options.compilerArgs += [
-                "-parameters",
-                "-Aquerydsl.getters.returnOptional=true"
-        ]
+    project.tasks.withType(JavaCompile).configureEach {
+        options.compilerArgs += ["-parameters"]
         options.getGeneratedSourceOutputDirectory().set(querydslDir)
     }
 
-    clean {
-        delete querydslDir
+    project.tasks.named("clean").configure {
+        doFirst {
+            delete querydslDir
+        }
     }
 
-    dependencies {
-        // Core Spring Boot Dependencies
-        implementation "org.springframework.boot:spring-boot-starter-data-jpa:${springBootVersion}"
-        implementation "org.springframework.boot:spring-boot-starter-web:${springBootVersion}"
-        implementation "org.springframework.boot:spring-boot-starter-validation:${springBootVersion}"
-        implementation "org.springframework.retry:spring-retry:${springRetryVersion}"
+    // QueryDSL 관련 태스크 의존성 명시적 설정
+    project.tasks.matching { it.name == 'compileJava' }.configureEach {
+        dependsOn project.tasks.matching { it.name.contains('querydsl') }
+    }
 
-        // QueryDSL - 대부분의 모듈에서 사용
+    project.dependencies {
         implementation "com.querydsl:querydsl-jpa:${querydslVersion}:jakarta"
         annotationProcessor "com.querydsl:querydsl-apt:${querydslVersion}:jakarta"
         annotationProcessor "jakarta.annotation:jakarta.annotation-api:${jakartaAnnotationVersion}"
         annotationProcessor "jakarta.persistence:jakarta.persistence-api:${jakartaPersistenceVersion}"
+    }
+}
 
-        // Lombok - 모든 모듈에서 사용
-        compileOnly "org.projectlombok:lombok:${lombokVersion}"
-        annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+//---- 🏗️  Infra Layer ----
+project(':member-infra') {
+    configureQueryDsl(project)
+    databaseDependencies(project)
 
-        // DB
-        runtimeOnly "mysql:mysql-connector-java:${mysqlVersion}"
-        runtimeOnly "com.oracle.database.jdbc:ojdbc8:${oracleVersion}"
+    dependencies {
+        implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 
-        // logstash
-        implementation 'net.logstash.logback:logstash-logback-encoder:7.4'
+        implementation project(':common')
+        implementation project(':member-domain')
+    }
+}
 
+project(':main-account-infra') {
+    configureQueryDsl(project)
+    databaseDependencies(project)
+
+    dependencies {
+        implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+        implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+        implementation project(':common')
+        implementation project(':main-account-domain')
+        implementation project(':member-infra')
+    }
+}
+
+project(':saving-account-infra') {
+    configureQueryDsl(project)
+    databaseDependencies(project)
+
+    dependencies {
+        implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+        implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+        implementation project(':common')
+        implementation project(':saving-account-domain')
+        implementation project(':main-account-infra')
+        implementation project(':member-infra')
+    }
+}
+
+project(':transfer-infra') {
+    configureQueryDsl(project)
+    databaseDependencies(project)
+
+    dependencies {
+        implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+
+        implementation project(':common')
+        implementation project(':transfer-domain')
+        implementation project(':member-domain')
+        implementation project(':member-infra')
+        implementation project(':main-account-infra')
+        implementation project(':saving-account-infra')
+    }
+}
+
+project(':transfer-log-infra') {
+    configureQueryDsl(project)
+    databaseDependencies(project)
+
+    dependencies {
+        implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+
+        implementation project(':common')
+        implementation project(':transfer-log-domain')
     }
 }
 
 //---- 🌟 Domain Layer ----
-project(':member-module') {
+project(':member-domain') {
     dependencies {
-        implementation project(':common-module')
+        implementation 'org.springframework:spring-context'
+
+        implementation project(':common')
     }
 }
 
-project(':main-account-module') {
+project(':main-account-domain') {
     dependencies {
-        implementation project(':member-module')
-        implementation project(':common-module')
+        implementation 'org.springframework:spring-context'
+
+        implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+        implementation project(':member-domain')
+        implementation project(':common')
     }
 }
 
-project(':saving-account-module') {
+project(':saving-account-domain') {
     dependencies {
-        implementation project(':main-account-module')
-        implementation project(':member-module')
-        implementation project(':common-module')
+        implementation 'org.springframework:spring-context'
+
+        implementation project(':main-account-domain')
+        implementation project(':member-domain')
+        implementation project(':common')
     }
 }
 
-project(':settlement-module') {
+project(':settlement-domain') {
     dependencies {
-        implementation project(':common-module')
+        implementation 'org.springframework:spring-context'
+        implementation project(':common')
     }
 }
 
-project(':transfer-module') {
+project(':transfer-domain') {
     dependencies {
-        implementation project(':member-module')
-        implementation project(':main-account-module')
-        implementation project(':saving-account-module')
-        implementation project(':common-module')
+        implementation 'org.springframework:spring-context'
+        implementation "org.springframework.boot:spring-boot-starter-data-jpa" // jakarta.persistenc 예외
+
+        implementation project(':member-domain')
+        implementation project(':main-account-domain')
+        implementation project(':saving-account-domain')
+        implementation project(':common')
     }
 }
 
-project(':transfer-log-module') {
+project(':transfer-log-domain') {
     dependencies {
-        implementation project(':common-module')
+        implementation 'org.springframework:spring-context'
+
+        implementation project(':common')
     }
 }
 
-project(':reminder-module') {
+project(':reminder') {
     dependencies {
-        implementation project(':member-module')
-        implementation project(':transfer-module')
-        implementation project(':common-module')
+        implementation 'org.springframework:spring-context'
+
+        implementation project(':member-domain')
+        implementation project(':transfer-domain')
+        implementation project(':common')
     }
 }
 
 //---- 🌐 Interface Layer ----
-project(':interface-module') {
+project(':interface') {
     dependencies {
+        implementation "org.springframework.boot:spring-boot-starter-data-jpa"
+
         // swagger
         implementation "org.springdoc:springdoc-openapi-starter-webmvc-ui:${springdocVersion}"
-
-        // Test Dependencies
-        testImplementation platform("org.springframework.boot:spring-boot-dependencies:${springBootVersion}")
-        testImplementation 'org.springframework.boot:spring-boot-starter-test'
-        testImplementation "org.junit.jupiter:junit-jupiter:${junitJupiterVersion}"
-        testImplementation "org.assertj:assertj-core:${assertjVersion}"
-
-        // Lombok for test
-        testCompileOnly "org.projectlombok:lombok:${lombokVersion}"
-        testAnnotationProcessor "org.projectlombok:lombok:${lombokVersion}"
 
         // Mapper
         implementation "org.mapstruct:mapstruct:${mapstructVersion}"
         annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
 
-        implementation project(':main-account-module')
-        implementation project(':member-module')
-        implementation project(':reminder-module')
-        implementation project(':saving-account-module')
-        implementation project(':settlement-module')
-        implementation project(':transfer-module')
-        implementation project(':transfer-log-module')
-        implementation project(':common-module')
+        implementation project(':main-account-domain')
+        implementation project(':member-domain')
+        implementation project(':reminder')
+        implementation project(':saving-account-domain')
+        implementation project(':settlement-domain')
+        implementation project(':transfer-domain')
+        implementation project(':transfer-log-domain')
+        implementation project(':common')
     }
 }
 
-project(':batch-module') {
+project(':batch') {
     dependencies {
-        implementation project(':interface-module')
-        implementation "org.springframework.boot:spring-boot-starter-batch:${springBootVersion}"
+        implementation project(':interface')
+        implementation "org.springframework.boot:spring-boot-starter-batch"
     }
 }
 
 //---- 📚 Common Layer ----
-project(':common-module') {
+project(':common') {
     dependencies {
         // Core Dependencies
-        implementation 'org.springframework.boot:spring-boot-starter-aop'
+        implementation 'org.springframework.boot:spring-boot-starter-web'
+        implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+        implementation 'org.springframework.boot:spring-boot-starter-validation'
         implementation "com.fasterxml.jackson.core:jackson-annotations:${jacksonVersion}"
+
+        implementation "com.querydsl:querydsl-jpa:${querydslVersion}:jakarta"
+        annotationProcessor "com.querydsl:querydsl-apt:${querydslVersion}:jakarta"
+        annotationProcessor "jakarta.annotation:jakarta.annotation-api:${jakartaAnnotationVersion}"
+        annotationProcessor "jakarta.persistence:jakarta.persistence-api:${jakartaPersistenceVersion}"
+    }
+}
+
+project(':app') {
+    dependencies {
+        // logstash
+        implementation "net.logstash.logback:logstash-logback-encoder:${logstashVersion}"
+
+        // swagger
+        implementation "org.springdoc:springdoc-openapi-starter-webmvc-ui:${springdocVersion}"
+
+        // Spring Data JPA
+        implementation "org.springframework.boot:spring-boot-starter-data-jpa"
+
+        // Test Dependencies
+//        testImplementation platform("org.springframework.boot:spring-boot-dependencies")
+//        testImplementation 'org.springframework.boot:spring-boot-starter-test'
+//        testImplementation "org.junit.jupiter:junit-jupiter:${junitJupiterVersion}"
+//        testImplementation "org.assertj:assertj-core:${assertjVersion}"
+//
+//        // Lombok for test
+//        testCompileOnly "org.projectlombok:lombok:${lombokVersion}"
+//        testAnnotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+
+        implementation project(':main-account-domain')
+        implementation project(':main-account-infra')
+        implementation project(':saving-account-domain')
+        implementation project(':saving-account-infra')
+        implementation project(':transfer-domain')
+        implementation project(':transfer-infra')
+        implementation project(':transfer-log-domain')
+        implementation project(':transfer-log-infra')
+        implementation project(':interface')
+        implementation project(':common')
     }
 }

@@ -1,0 +1,54 @@
+spring:
+  application:
+    name: mini-pay
+
+  profiles:
+    active: oracle,dev  # 현재 활성화할 프로파일 지정
+
+  #항목	            prod	        dev	            local
+  #로그 태그	        prod	        dev	            local
+  #로그 분리 및 보존	일 단위, 30일	    분 단위, 30개     분 단위, 5개
+  #로그 레벨	        info	        trace        	info
+
+  config:
+    import:
+      - optional:file:main-account-infra/src/main/resources/main-account-policy.yml
+      - optional:file:saving-account-infra/src/main/resources/saving-account-policy.yml
+      - optional:file:transfer-infra/src/main/resources/transfer-transaction-policy.yml
+
+# java -XX:+PrintFlagsFinal -version # JVM이 사용하는 내부 설정값(Flags)을 전부 출력
+# 기본 JVM 메모리 설정: -Xms = 약 256MB, -Xmx = 약 4GB (전체의 1/4)
+# Stack Memory (-Xss) 기본: 1MB per thread
+# GC 관련 기본 설정은 G1 -> 전체 heap의 45% 사용 시 GC 시작
+# G1ReservePercent = 10 → GC 성능 보장을 위한 여유 공간 (10%)
+# MaxRAMPercentage	전체 메모리 중 heap 사용 비율	25%
+# CICompilerCount	JIT 컴파일러 스레드 수	4개
+# ConcGCThreads	GC 시 병렬로 작업할 스레드 수	2개 (자동 조정 설정)
+server:
+  port: 8080
+  tomcat:
+    threads:
+      max: 50 # 400 # (사용자 기준)
+      min-spare: 5 # 75 # max의 10~25%가 일반적인 기준입니다.
+
+
+springdoc:
+  swagger-ui:
+    tags-sorter: alpha
+
+logging:
+  level:
+    root: Info
+#    org:
+#      hibernate:
+#        engine:
+#          transaction: DEBUG
+#        SQL: DEBUG
+#        type:
+#          descriptor:
+#            sql:
+#              BasicBinder: TRACE
+#      .springframework:
+#        transaction: TRACE
+
+

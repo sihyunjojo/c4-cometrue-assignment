@@ -1,0 +1,47 @@
+package org.c4marathon.assignment.infra.persistence.repository.jpa;
+
+import java.util.List;
+import java.util.Optional;
+
+import org.c4marathon.assignment.infra.persistence.entity.SavingAccountJpaEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.QueryHints;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
+
+import jakarta.persistence.QueryHint;
+
+@Repository
+public interface JpaSavingAccountRepository extends JpaRepository<SavingAccountJpaEntity, Long> {
+	@Query("SELECT sa FROM SavingAccountJpaEntity sa " +
+		"JOIN FETCH sa.mainAccount " +
+		"WHERE sa.savingType = 'FIXED'")
+	List<SavingAccountJpaEntity> findAllFixedSavingAccountWithMainAccount();
+
+	@Query("SELECT s FROM SavingAccountJpaEntity s WHERE s.id = :id")
+	@QueryHints({
+		@QueryHint(name = "org.hibernate.cacheable", value = "false"),
+		@QueryHint(name = "jakarta.persistence.cache.retrieveMode", value = "BYPASS"),
+		@QueryHint(name = "jakarta.persistence.cache.storeMode", value = "REFRESH")
+	})
+	Optional<SavingAccountJpaEntity> findByIdWithoutSecondCache(@Param("id") Long id);
+
+	@Modifying(clearAutomatically = true)
+	@Query("UPDATE SavingAccountJpaEntity a SET a.balance = a.balance + :amount, a.version = a.version + 1 "
+		+ "WHERE a.id = :accountId AND a.version = :version")
+	int depositByOptimistic(@Param("accountId") Long accountId, @Param("amount") Long amount,
+		@Param("version") Long version);
+
+	boolean existsByAccountNumber(String accountNumber);
+
+	@Query("SELECT sa FROM SavingAccountJpaEntity sa WHERE sa.accountNumber = :accountNumber")
+	@QueryHints({
+		@QueryHint(name = "org.hibernate.cacheable", value = "false"),
+		@QueryHint(name = "jakarta.persistence.cache.retrieveMode", value = "BYPASS"),
+		@QueryHint(name = "jakarta.persistence.cache.storeMode", value = "REFRESH")
+	})
+	Optional<SavingAccountJpaEntity> findByAccountNumber(@Param("accountNumber") String accountNumber);
+
+}

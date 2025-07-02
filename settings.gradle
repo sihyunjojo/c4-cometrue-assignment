@@ -1,17 +1,27 @@
 rootProject.name = 'assignment'
 
+// App Modules
+include 'app'
+
 // Core Modules
-include 'common-module'
+include 'common'
+
+// Infra Modules
+include 'member-infra'
+include 'main-account-infra'
+include 'saving-account-infra'
+include 'transfer-infra'
+include 'transfer-log-infra'
 
 // Domain Modules
-include 'member-module'
-include 'main-account-module'
-include 'saving-account-module'
-include 'transfer-module'
-include 'transfer-log-module'
-include 'settlement-module'
+include 'member-domain'
+include 'main-account-domain'
+include 'saving-account-domain'
+include 'transfer-domain'
+include 'transfer-log-domain'
+include 'settlement-domain'
 
 // Application Modules
-include 'interface-module'
-include 'batch-module'
-include 'reminder-module'
+include 'interface'
+include 'batch'
+include 'reminder'
