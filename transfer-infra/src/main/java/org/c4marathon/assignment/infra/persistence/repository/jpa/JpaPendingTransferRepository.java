@@ -19,6 +19,6 @@ public interface JpaPendingTransferRepository extends JpaRepository<PendingTrans
     @Query("SELECT t FROM PendingTransferJpaEntity t LEFT JOIN t.toMainAccount m WHERE t.status = org.c4marathon.assignment.enums.TransferStatus.PENDING AND t.createdAt <= :notificationReadyCutoffTime")
     List<PendingTransferJpaEntity> findRemindPendingTargetTransactionsWithMainAccount(@Param("notificationReadyCutoffTime") LocalDateTime notificationReadyCutoffTime);
 
-    @Query("SELECT t FROM PendingTransferJpaEntity t LEFT JOIN t.toMainAccount m LEFT JOIN m.member WHERE t.status = org.c4marathon.assignment.enums.TransferStatus.PENDING AND  <= :notificationReadyCutoffTime")
+    @Query("SELECT t FROM PendingTransferJpaEntity t LEFT JOIN t.toMainAccount m LEFT JOIN m.member WHERE t.status = org.c4marathon.assignment.enums.TransferStatus.PENDING AND t.createdAt  <= :notificationReadyCutoffTime")
     List<PendingTransferJpaEntity> findRemindPendingTargetTransactionsWithMember(@Param("notificationReadyCutoffTime") LocalDateTime notificationReadyCutoffTime);
 }
