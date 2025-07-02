@@ -15,9 +15,7 @@ import org.c4marathon.assignment.infra.persistence.repository.query.TransferLogQ
 import org.c4marathon.assignment.pagination.PageRequest;
 import org.c4marathon.assignment.pagination.PageResult;
 import org.c4marathon.assignment.pagination.SliceResult;
-import org.c4marathon.assignment.pagination.converter.PageConverter;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
