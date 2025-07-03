@@ -105,20 +105,23 @@ public class PendingTransferService {
 	}
 
 	public Map<Member, List<PendingTransfer>> findRemindTargetGroupedByMember() {
-		Duration duration = pendingTransferPolicy.getPendingTransferRemindDurationHours();
-		LocalDateTime remindTime = LocalDateTime.now().minus(duration);
+		Duration remindDurationHour = pendingTransferPolicy.getPendingTransferRemindDurationHours();
+		LocalDateTime notificationReadyCutoffTime = LocalDateTime.now().minus(remindDurationHour);
 
-		return pendingTransferRepository.findRemindTargetGroupedByMember(remindTime);
+		return pendingTransferRepository.findRemindTargetGroupedByMember(notificationReadyCutoffTime);
 	}
 
 	public List<PendingTransfer> findRemindPendingTargetTransactionsWithMember() {
-		Duration duration = pendingTransferPolicy.getPendingTransferRemindDurationHours();
-		LocalDateTime remindTime = LocalDateTime.now().minus(duration);
+		Duration remindDurationHour = pendingTransferPolicy.getPendingTransferRemindDurationHours();
+		LocalDateTime notificationReadyCutoffTime = LocalDateTime.now().minus(remindDurationHour);
 
-		return pendingTransferRepository.findRemindTargetsWithMember(remindTime);
+		return pendingTransferRepository.findRemindTargetsWithMember(notificationReadyCutoffTime);
 	}
 
 	public List<PendingTransfer> findRemindPendingTransferWithMainAccount() {
-		return pendingTransferRepository.findRemindTargetsWithMainAccount(LocalDateTime.now());
+		Duration remindDurationHour = pendingTransferPolicy.getPendingTransferRemindDurationHours();
+		LocalDateTime notificationReadyCutoffTime = LocalDateTime.now().minus(remindDurationHour);
+
+		return pendingTransferRepository.findRemindTargetsWithMainAccount(notificationReadyCutoffTime);
 	}
 }

@@ -2,6 +2,7 @@ package org.c4marathon.assignment.infra.persistence.repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+
 import org.c4marathon.assignment.domain.model.TransferLog;
 import org.c4marathon.assignment.infra.persistence.entity.TransferLogJpaEntity;
 import org.springframework.stereotype.Repository;
@@ -14,9 +15,7 @@ import org.c4marathon.assignment.infra.persistence.repository.query.TransferLogQ
 import org.c4marathon.assignment.pagination.PageRequest;
 import org.c4marathon.assignment.pagination.PageResult;
 import org.c4marathon.assignment.pagination.SliceResult;
-import org.c4marathon.assignment.pagination.converter.PageConverter;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
@@ -77,19 +76,16 @@ public class TransferLogRepositoryImpl implements TransferLogRepository {
 
 		Page<TransferLogJpaEntity> result = query.findPageByAccountNumber(accountNumber, springPageable);
 
-		// Convert Page<TransferLogJpaEntity> to Page<TransferLog> before converting to PageResult
 		List<TransferLog> content = result.getContent().stream()
 			.map(TransferLogJpaEntity::toDomain)
 			.toList();
 
-		// Create a new Page with the converted content
-		Page<TransferLog> domainPage = new PageImpl<>(
+		return PageResult.of(
 			content,
-			result.getPageable(),
-			result.getTotalElements()
+			result.getNumber(),
+			result.getSize(),
+			result.getTotalElements(),
+			result.getTotalPages()
 		);
-
-		return PageConverter.fromSpringPage(domainPage);
 	}
-
 }

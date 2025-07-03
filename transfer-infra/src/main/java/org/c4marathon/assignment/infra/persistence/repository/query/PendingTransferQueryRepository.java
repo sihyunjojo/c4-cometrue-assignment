@@ -8,5 +8,5 @@ import org.c4marathon.assignment.domain.model.Member;
 import org.c4marathon.assignment.domain.model.PendingTransfer;
 
 public interface PendingTransferQueryRepository {
-    Map<Member, List<PendingTransfer>> findRemindTargetGroupedByMember(LocalDateTime remindTime);
+    Map<Member, List<PendingTransfer>> findRemindTargetGroupedByMember(LocalDateTime notificationReadyCutoffTime);
 }

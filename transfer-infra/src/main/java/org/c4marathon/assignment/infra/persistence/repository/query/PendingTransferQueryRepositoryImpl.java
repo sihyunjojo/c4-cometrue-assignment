@@ -27,7 +27,7 @@ public class PendingTransferQueryRepositoryImpl implements PendingTransferQueryR
 	private final JPAQueryFactory queryFactory;
 
 	@Override
-	public Map<Member, List<PendingTransfer>> findRemindTargetGroupedByMember(LocalDateTime remindTime) {
+	public Map<Member, List<PendingTransfer>> findRemindTargetGroupedByMember(LocalDateTime notificationReadyCutoffTime) {
 		// 1. 만료된 PendingTransfer 조회 (QueryDSL 사용)
 		List<PendingTransferJpaEntity> pendingTransfers = queryFactory
 			.selectFrom(pendingTransferJpaEntity)
@@ -35,7 +35,7 @@ public class PendingTransferQueryRepositoryImpl implements PendingTransferQueryR
 			.join(mainAccountJpaEntity.member).fetchJoin()
 			.where(
 				pendingTransferJpaEntity.status.eq(TransferStatus.PENDING),
-				pendingTransferJpaEntity.expiredAt.loe(remindTime)
+				pendingTransferJpaEntity.createdAt.loe(notificationReadyCutoffTime)
 			)
 			.fetch();
 
