@@ -177,6 +177,19 @@ project(':transfer-log-infra') {
     }
 }
 
+project(':dlq-infra') {
+    configureQueryDsl(project)
+    databaseDependencies(project)
+
+    dependencies {
+        implementation project(':common')
+        implementation project(':transfer-log-domain')
+        implementation project(':dlq-domain')
+
+        implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    }
+}
+
 //---- 🌟 Domain Layer ----
 project(':member-domain') {
     dependencies {
@@ -233,6 +246,14 @@ project(':transfer-log-domain') {
     }
 }
 
+project(':dlq-domain') {
+    dependencies {
+        implementation 'org.springframework:spring-context'
+
+        implementation project(':common')
+    }
+}
+
 project(':reminder') {
     dependencies {
         implementation 'org.springframework:spring-context'
@@ -242,6 +263,8 @@ project(':reminder') {
         implementation project(':common')
     }
 }
+
+
 
 //---- 🌐 Interface Layer ----
 project(':interface') {
@@ -262,6 +285,8 @@ project(':interface') {
         implementation project(':settlement-domain')
         implementation project(':transfer-domain')
         implementation project(':transfer-log-domain')
+        implementation project(':dlq-domain')
+        implementation project(':dlq-infra')  // 🔥 이 라인 추가
         implementation project(':common')
     }
 }
@@ -269,6 +294,11 @@ project(':interface') {
 project(':batch') {
     dependencies {
         implementation project(':interface')
+        implementation project(':dlq-domain')
+        implementation project(':transfer-log-domain')
+
+        implementation project(':common')
+        implementation "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
         implementation "org.springframework.boot:spring-boot-starter-batch"
     }
 }
@@ -318,7 +348,10 @@ project(':app') {
         implementation project(':transfer-infra')
         implementation project(':transfer-log-domain')
         implementation project(':transfer-log-infra')
+        implementation project(':dlq-domain')
+        implementation project(':dlq-infra')
         implementation project(':interface')
         implementation project(':common')
+        implementation project(':batch')
     }
 }

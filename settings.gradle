@@ -12,6 +12,7 @@ include 'main-account-infra'
 include 'saving-account-infra'
 include 'transfer-infra'
 include 'transfer-log-infra'
+include 'dlq-infra'
 
 // Domain Modules
 include 'member-domain'
@@ -20,6 +21,7 @@ include 'saving-account-domain'
 include 'transfer-domain'
 include 'transfer-log-domain'
 include 'settlement-domain'
+include 'dlq-domain'
 
 // Application Modules
 include 'interface'
