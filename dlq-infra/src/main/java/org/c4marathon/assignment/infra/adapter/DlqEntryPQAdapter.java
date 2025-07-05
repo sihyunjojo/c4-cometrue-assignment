@@ -51,7 +51,7 @@ public class DlqEntryPQAdapter implements DlqEntryPublisherPort {
 	}
 
 	@Override
-	public void removeIf(DlqEntry entry) {
+	public void replaceById(DlqEntry entry) {
 		// 인메모리 큐에서도 업데이트 (기존 엔트리 제거 후 새 엔트리 추가)
 		inMemoryDlq.removeIf(e -> e.getId().equals(entry.getId()));
 	}

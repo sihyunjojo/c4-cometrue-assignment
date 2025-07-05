@@ -15,7 +15,7 @@ public interface DlqEntryPublisherPort {
 
 	void offer(DlqEntry savedEntity);
 
-	void removeIf(DlqEntry entry);
+	void replaceById(DlqEntry entry);
 
 	int size();
 }
