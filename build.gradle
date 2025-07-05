@@ -241,6 +241,7 @@ project(':transfer-domain') {
 project(':transfer-log-domain') {
     dependencies {
         implementation 'org.springframework:spring-context'
+        implementation "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
 
         implementation project(':common')
     }
