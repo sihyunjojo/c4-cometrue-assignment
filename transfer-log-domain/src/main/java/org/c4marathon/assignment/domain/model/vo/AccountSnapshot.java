@@ -4,6 +4,9 @@ import org.c4marathon.assignment.enums.AccountType;
 import org.c4marathon.assignment.model.Account;
 import org.c4marathon.assignment.policy.ExternalAccountPolicy;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public record AccountSnapshot(Long id, AccountType type, String number) {
 	public static AccountSnapshot from(Account account) {
 		if (account == null) {
@@ -18,4 +21,12 @@ public record AccountSnapshot(Long id, AccountType type, String number) {
 		}
 		return new AccountSnapshot(policy.getId(), policy.getType(), policy.getNumber());
 	}
+
+	@JsonCreator
+    public static AccountSnapshot create(
+            @JsonProperty("id") Long id,
+            @JsonProperty("type") AccountType type,
+            @JsonProperty("number") String number) {
+        return new AccountSnapshot(id, type, number);
+    }
 }
