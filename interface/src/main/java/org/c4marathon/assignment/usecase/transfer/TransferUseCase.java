@@ -158,8 +158,7 @@ public class TransferUseCase {
 
 	private void saveTransferLogFailureToDlq(TransferLog transferLog) {
 		try {
-			throw new RuntimeException("의도적인 예외");
-			// transferLogService.saveTransferLog(transferLog);
+			transferLogService.saveTransferLog(transferLog);
 		} catch (Exception e) {
 			log.error("송금 이력 저장 실패, DLQ에 추가: {}", e.getMessage(), e);
 			try {
@@ -171,5 +170,4 @@ public class TransferUseCase {
 			}
 		}
 	}
-
 }
