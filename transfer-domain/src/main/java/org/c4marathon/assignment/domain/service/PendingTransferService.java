@@ -53,12 +53,7 @@ public class PendingTransferService {
 		MainAccount toAccount = mainAccountRepository.findById(tx.getToMainAccountId())
 			.orElseThrow(() -> new IllegalArgumentException("입금 계좌가 존재하지 않습니다"));
 
-		int result = mainAccountRepository.depositByOptimistic(tx.getToMainAccountId(), tx.getAmount(),
-			toAccount.getVersion());
-
-		if (result == 0) {
-			throw new OptimisticLockException("입금 실패 - 동시성 문제");
-		}
+		depositByOptimistic(tx, toAccount);
 
 		tx.markAsCompleted();
 		pendingTransferRepository.save(tx);
@@ -72,31 +67,31 @@ public class PendingTransferService {
 		MainAccount fromAccount = mainAccountRepository.findById(tx.getFromMainAccountId())
 			.orElseThrow(() -> new IllegalArgumentException("환불 계좌가 존재하지 않습니다"));
 
-		int result = mainAccountRepository.depositByOptimistic(tx.getFromMainAccountId(), tx.getAmount(),
-			fromAccount.getVersion());
-
-		if (result == 0) {
-			throw new OptimisticLockException("환불 실패 - 동시성 문제");
-		}
+		depositByOptimistic(tx, fromAccount);
 
 		tx.markAsCanceled();
 		pendingTransferRepository.save(tx);
 		return true;
 	}
 
-	public void expired(PendingTransfer tx) {
+	public Boolean expired(PendingTransfer tx) {
 		MainAccount fromAccount = mainAccountRepository.findById(tx.getFromMainAccountId())
 			.orElseThrow(() -> new IllegalArgumentException("환불 계좌가 존재하지 않습니다"));
 
+		depositByOptimistic(tx, fromAccount);
+
+		tx.markAsExpired();
+		pendingTransferRepository.save(tx);
+		return true;
+	}
+
+	private void depositByOptimistic(PendingTransfer tx, MainAccount account) {
 		int result = mainAccountRepository.depositByOptimistic(tx.getFromMainAccountId(), tx.getAmount(),
-			fromAccount.getVersion());
+			account.getVersion());
 
 		if (result == 0) {
 			throw new OptimisticLockException("환불 실패 - 동시성 문제");
 		}
-
-		tx.markAsExpired();
-		pendingTransferRepository.save(tx);
 	}
 
 	public PendingTransfer findPendingTransfer(Long transactionId) {
@@ -111,11 +106,11 @@ public class PendingTransferService {
 		return pendingTransferRepository.findRemindTargetGroupedByMember(notificationReadyCutoffTime);
 	}
 
-	public List<PendingTransfer> findRemindPendingTargetTransactionsWithMember() {
-		Duration remindDurationHour = pendingTransferPolicy.getPendingTransferRemindDurationHours();
+	public List<PendingTransfer> findExpirablePendingTransfersWithMember() {
+		Duration remindDurationHour = pendingTransferPolicy.getPendingTransferExpireAfterDurationHours();
 		LocalDateTime notificationReadyCutoffTime = LocalDateTime.now().minus(remindDurationHour);
 
-		return pendingTransferRepository.findRemindTargetsWithMember(notificationReadyCutoffTime);
+		return pendingTransferRepository.findExpirablePendingTransfersWithMember(notificationReadyCutoffTime);
 	}
 
 	public List<PendingTransfer> findRemindPendingTransferWithMainAccount() {
