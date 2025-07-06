@@ -31,7 +31,6 @@ public class DlqUsecase {
 		String payload = objectMapper.writeValueAsString(transferLog);
 		DlqEntry dlqEntry = new DlqEntry("CREATE_TRANSFER_LOG", payload, e.getMessage());
 		dlqEntryService.save(dlqEntry);
-		log.info("DLQ에 송금 이력 작업 추가 완료: {}", dlqEntry.getId());
 	}
 
 	/**

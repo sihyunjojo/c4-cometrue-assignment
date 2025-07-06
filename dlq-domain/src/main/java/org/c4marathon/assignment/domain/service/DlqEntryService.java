@@ -13,8 +13,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class DlqEntryService {
 
-	private final DlqEntryStoragePort dlqEntryStoragePort; // JPA 어댑터가 주입될 것임
-	private final DlqEntryPublisherPort dlqEntryPublisherPort; // RabbitMQ 어댑터가 주입될 것임
+	private final DlqEntryStoragePort dlqEntryStoragePort;
+	private final DlqEntryPublisherPort dlqEntryPublisherPort;
 
 	/**
 	 * DLQ에 새로운 엔트리를 추가합니다.

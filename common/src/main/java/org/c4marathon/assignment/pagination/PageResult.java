@@ -1,8 +1,6 @@
 package org.c4marathon.assignment.pagination;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
