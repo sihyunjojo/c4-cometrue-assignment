@@ -28,6 +28,8 @@ public class MainAccount implements Account {
 		return MainAccount.builder()
 			.accountNumber(accountNumber)
 			.memberId(memberId)
+			.balance(0L)
+			.dailyChargeAmount(0L)
 			.build();
 	}
 
