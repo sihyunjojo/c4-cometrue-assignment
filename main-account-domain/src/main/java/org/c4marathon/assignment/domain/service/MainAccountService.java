@@ -73,6 +73,10 @@ public class MainAccountService {
 		mainAccountRepository.resetAllDailyChargeAmount();
 	}
 
+	public int depositByOptimistic(MainAccount mainAccount, Long amount) {
+		return mainAccountRepository.depositByOptimistic(mainAccount.getId(), amount, mainAccount.getVersion());
+	}
+
 	public Long calculateShortfall(Long accountId, Long transferAmount) {
 		Long currentBalance = mainAccountRepository.findMainAccountAmountById(accountId);
 		long diff = transferAmount - currentBalance;

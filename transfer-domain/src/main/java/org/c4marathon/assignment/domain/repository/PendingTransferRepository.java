@@ -15,7 +15,7 @@ public interface PendingTransferRepository  {
     
     List<PendingTransfer> findRemindTargetsWithMainAccount(LocalDateTime notificationReadyCutoffTime);
     
-    List<PendingTransfer> findRemindTargetsWithMember(LocalDateTime notificationReadyCutoffTime);
+    List<PendingTransfer> findExpirablePendingTransfersWithMember(LocalDateTime notificationReadyCutoffTime);
     
     Map<Member, List<PendingTransfer>> findRemindTargetGroupedByMember(LocalDateTime notificationReadyCutoffTime);
 }
