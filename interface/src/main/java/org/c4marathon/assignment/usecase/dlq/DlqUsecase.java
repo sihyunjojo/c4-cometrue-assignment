@@ -5,6 +5,7 @@ import java.util.List;
 import org.c4marathon.assignment.domain.model.DlqEntry;
 import org.c4marathon.assignment.domain.model.TransferLog;
 import org.c4marathon.assignment.domain.service.DlqEntryService;
+import org.c4marathon.assignment.domain.service.SlackService;
 import org.c4marathon.assignment.domain.service.TransferLogService;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +24,7 @@ public class DlqUsecase {
 	private final static int MAX_RETRIES = 3;
 
 	private final DlqEntryService dlqEntryService;
+	private final SlackService slackService;
 	private final ObjectMapper objectMapper;
 	private final TransferLogService transferLogService;
 
@@ -46,16 +48,21 @@ public class DlqUsecase {
 		return pendingEntries.size();
 	}
 
-	@Transactional(readOnly = true)
 	public int getMQSize() {
 		return dlqEntryService.getMQSize();
 	}
 
+	public void checkDlqMessageCount(int dlqThreshold) {
+		long currentMessageCount = dlqEntryService.getMQSize();
+
+        if (currentMessageCount > dlqThreshold) {
+			log.warn("DLQ 메시지 수 임계 값({})를 초과했습니다 . 현재 메시지 수: {}", dlqThreshold, currentMessageCount);
+			slackService.sendSlackNotification(dlqThreshold, currentMessageCount);
+		}
+	}
+
 	private void processSingleDlqEntry(DlqEntry entry) {
 		try {
-			log.info("DLQ 엔트리 처리 중: ID = {}, Operation = {}, RetryCount = {}",
-				entry.getId(), entry.getOperationType(), entry.getRetryCount());
-
 			// 재시도 횟수 초과 시 영구 실패 처리
 			if (entry.getRetryCount() >= MAX_RETRIES) {
 				entry.markAsFailed();
