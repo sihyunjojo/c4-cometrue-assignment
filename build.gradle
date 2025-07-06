@@ -259,6 +259,9 @@ project(':reminder') {
     dependencies {
         implementation 'org.springframework:spring-context'
 
+        // slack
+        implementation "com.slack.api:slack-api-client:${slackVersion}" // 슬랙 API 클라이언트
+
         implementation project(':member-domain')
         implementation project(':transfer-domain')
         implementation project(':common')
@@ -297,8 +300,8 @@ project(':batch') {
         implementation project(':interface')
         implementation project(':dlq-domain')
         implementation project(':transfer-log-domain')
-
         implementation project(':common')
+
         implementation "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
         implementation "org.springframework.boot:spring-boot-starter-batch"
     }

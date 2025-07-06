@@ -3,7 +3,7 @@ spring:
     name: mini-pay
 
   profiles:
-    active: oracle,dev  # 현재 활성화할 프로파일 지정
+    active: oracle,dev,value  # 현재 활성화할 프로파일 지정
 
   #항목	            prod	        dev	            local
   #로그 태그	        prod	        dev	            local
@@ -51,4 +51,6 @@ logging:
 #      .springframework:
 #        transaction: TRACE
 
-
+slack:
+  token: ${SLACK_TOKEN}
+  channel: ${SLACK_CHANNEL}
