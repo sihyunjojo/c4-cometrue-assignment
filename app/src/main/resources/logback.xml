@@ -6,6 +6,7 @@
     <appender name="LOGSTASH" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
         <destination>localhost:5044</destination> <!-- 실제 logstash IP 주소를 사용해야 함 지금은 실습이라 localhost:5044 -->
         <encoder class="net.logstash.logback.encoder.LogstashEncoder"/>
+            <includeLevelValue>false</includeLevelValue>
         <!-- Elasticsearch Multi-head 의 Browser 의 Result Source 를 보면 json 형태의 값들을 볼 수 있는데 이 작업은 <encoder class="net.logstash.logback.encoder.LogstashEncoder" /> 가 해주고 있다 -->
     </appender>
 
