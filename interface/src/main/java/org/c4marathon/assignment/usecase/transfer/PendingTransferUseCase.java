@@ -110,26 +110,30 @@ public class PendingTransferUseCase {
 
 	// todo: 보상 로직 만들기 (DLQ)
 	@Transactional
-	public void expirePendingTransfer() {
-		List<PendingTransfer> expiredPendingTransfers = pendingTransferService.findRemindPendingTransferWithMainAccount();
-
+	public void expirePendingTransferList() {
+		List<PendingTransfer> expiredPendingTransfers = pendingTransferService.findExpirablePendingTransfersWithMember();
 		for (PendingTransfer tx : expiredPendingTransfers) {
-			pendingTransferService.expired(tx);
-
-			// 계좌 정보 조회
-			MainAccount fromAccount = mainAccountService.findById(tx.getFromMainAccountId());
-			MainAccount toAccount = mainAccountService.findById(tx.getToMainAccountId());
-
-			TransferLog transferLog = transferLogFactory.createExpirePendingTransferLog(
-					tx.getId(),
-					fromAccount,
-					toAccount,
-					tx.getAmount(),
-					tx.getCreatedAt());
-			transferLogService.saveTransferLog(transferLog);
+			expirePendingTransfer(tx);
 		}
 	}
 
+	public void expirePendingTransfer(PendingTransfer tx) {
+		// 계좌 정보 조회
+		MainAccount fromAccount = mainAccountService.findById(tx.getFromMainAccountId());
+		MainAccount toAccount = mainAccountService.findById(tx.getToMainAccountId());
+
+		retryExecutor.executeWithRetry(() -> pendingTransferService.expired(tx));
+
+		TransferLog transferLog = transferLogFactory.createExpirePendingTransferLog(
+				tx.getId(),
+				fromAccount,
+				toAccount,
+				tx.getAmount(),
+				tx.getCreatedAt());
+		transferLogService.saveTransferLog(transferLog);
+	}
+
+	@Transactional(readOnly = true)
 	public void remindPendingTargetTransactionsByImproved() {
 		Map<Member, List<PendingTransfer>> remindTargetGroupedByMember = pendingTransferService.findRemindTargetGroupedByMember();
 		reminderService.remindTransactions(remindTargetGroupedByMember);

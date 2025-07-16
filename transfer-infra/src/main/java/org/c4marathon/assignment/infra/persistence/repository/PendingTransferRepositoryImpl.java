@@ -50,8 +50,8 @@ public class PendingTransferRepositoryImpl implements PendingTransferRepository 
     }
 
     @Override
-    public List<PendingTransfer> findRemindTargetsWithMember(LocalDateTime notificationReadyCutoffTime) {
-        return jpaPendingTransferRepository.findRemindPendingTargetTransactionsWithMember(notificationReadyCutoffTime).stream()
+    public List<PendingTransfer> findExpirablePendingTransfersWithMember(LocalDateTime notificationReadyCutoffTime) {
+        return jpaPendingTransferRepository.findExpirablePendingTransfersWithMember(notificationReadyCutoffTime).stream()
             .map(PendingTransferJpaEntity::toDomain)
             .toList();
     }

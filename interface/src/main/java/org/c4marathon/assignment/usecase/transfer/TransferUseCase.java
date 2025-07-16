@@ -14,7 +14,8 @@ import org.c4marathon.assignment.policy.ExternalAccountPolicy;
 import org.c4marathon.assignment.retry.RetryExecutor;
 import org.c4marathon.assignment.api.transfer.dto.TransferRequestDto;
 import org.c4marathon.assignment.api.transfer.dto.AccountNumberTransferRequestDto;
-import org.springframework.stereotype.Service;
+import org.c4marathon.assignment.usecase.dlq.DlqUsecase;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
@@ -24,10 +25,11 @@ import lombok.extern.slf4j.Slf4j;
  * 계좌 이체 유스케이스를 처리하는 서비스
  */
 @Slf4j
-@Service
+@Component
 @RequiredArgsConstructor
 public class TransferUseCase {
 
+	private final DlqUsecase dlqUsecase;
 	private final MainAccountService mainAccountService;
 	private final SavingAccountService savingAccountService;
 	private final TransferService transferService;
@@ -122,7 +124,8 @@ public class TransferUseCase {
 		// 송금 성공 시 로그 생성
 		TransferLog transferLog = transferLogFactory.createImmediateTransferLog(
 			refreshedFromAccount, refreshedToAccount, amount);
-		transferLogService.saveTransferLog(transferLog);
+
+		saveTransferLogFailureToDlq(transferLog);
 	}
 
 	/**
@@ -145,6 +148,23 @@ public class TransferUseCase {
 		// 송금 성공 시 로그 생성
 		TransferLog transferLog = transferLogFactory.createImmediateTransferLog(
 			refreshedFromAccount, refreshedToAccount, amount);
-		transferLogService.saveTransferLog(transferLog);
+
+		saveTransferLogFailureToDlq(transferLog);
+	}
+
+	private void saveTransferLogFailureToDlq(TransferLog transferLog) {
+		try {
+			transferLogService.saveTransferLog(transferLog);
+		} catch (Exception e) {
+			log.error("송금 이력 저장 실패, DLQ에 추가: {}", e.getMessage(), e);
+			try {
+				// TransferLog 객체를 JSON 문자열로 변환하여 payload에 저장
+				dlqUsecase.saveDLQ(e, transferLog);
+			} catch (Exception dlqException) {
+				log.error("CRITICAL: DLQ 저장 실패. 데이터가 유실될 수 있습니다. 원인: {}", dlqException.getMessage(), dlqException);
+				// DLQ 저장 실패는 심각한 문제이므로, 런타임 예외를 발생시켜 트랜잭션을 롤백하고 시스템에 알려야 합니다.
+				throw new RuntimeException("DLQ 저장에 실패했습니다.", dlqException);
+			}
+		}
 	}
 }

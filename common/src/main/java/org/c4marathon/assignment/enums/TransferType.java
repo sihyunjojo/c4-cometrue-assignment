@@ -1,5 +1,8 @@
 package org.c4marathon.assignment.enums;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
+
 public enum TransferType {
 	IMMEDIATE,
 	PENDING,
@@ -20,4 +23,14 @@ public enum TransferType {
 			case PENDING -> status == TransferStatus.COMPLETED;
 		};
 	}
+
+	@JsonValue
+    public String getValue() {
+        return name();
+    }
+
+    @JsonCreator
+    public static TransferType fromValue(String value) {
+        return valueOf(value);
+    }
 }

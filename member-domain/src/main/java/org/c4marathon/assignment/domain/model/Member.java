@@ -28,4 +28,16 @@ public class Member {
         return new Member(id, name, email, password, createdAt, updatedAt);
     }
 
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		Member member = (Member) o;
+		return id.equals(member.id);
+	}
+
+	@Override
+	public int hashCode() {
+		return id.hashCode();
+	}
 }

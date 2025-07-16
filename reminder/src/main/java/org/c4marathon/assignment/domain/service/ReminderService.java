@@ -7,12 +7,10 @@ import org.c4marathon.assignment.domain.model.Member;
 import org.c4marathon.assignment.domain.model.PendingTransfer;
 import org.springframework.stereotype.Service;
 
-import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
-@AllArgsConstructor
 public class ReminderService {
 
 	// public void remindTransactions(PendingTransfer transferTransaction) {
@@ -26,7 +24,7 @@ public class ReminderService {
 
 	public void remindTransactions(Map<Member, List<PendingTransfer>> grouped) {
 		grouped.forEach((member, transactions) -> {
-			log.info("[RemindGroup] Member: {} ({}건)", member.getName(), transactions.size());
+			log.info("[RemindGroup] Member ID: {}, Member: {} ({}건)", member.getId(), member.getName(), transactions.size());
 
 			transactions.forEach(tx ->
 				log.info(" - Tx ID: {}, Amount: {}, ExpiredAt: {}",

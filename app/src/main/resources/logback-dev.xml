@@ -1,31 +1,68 @@
 <configuration>
     <property name="LOG_FILE" value="log/application.log"/>
 
+    <!-- ✅ Logstash 전송용 : Logstash 로 전송할 Appender -->
     <appender name="LOGSTASH" class="net.logstash.logback.appender.LogstashTcpSocketAppender">
-<!--        <destination>localhost:5044</destination>-->
-        <destination>172.22.0.4:5044</destination>
+<!--        <destination>172.22.0.4:5044</destination>-->
 <!--        <destination>host.docker.internal:5044</destination>-->
-        <encoder class="net.logstash.logback.encoder.LogstashEncoder"/>
+        <destination>localhost:5044</destination> <!-- 실제 logstash IP 주소를 사용해야 함 지금은 실습이라 localhost:5044 -->
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+        </encoder>
     </appender>
 
+    <!-- 콘솔 출력 -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <pattern>%d{yyyy-MM-dd HH:mm:ss} dev %-5level [%thread] %logger{36} - %msg%n</pattern>
         </encoder>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>INFO</level>
+        </filter>
     </appender>
 
+    <!-- SQL 전용 콘솔 출력 (TRACE 레벨) -->
+    <appender name="SQL_CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} dev %-5level [%thread] %logger{36} - %msg%n</pattern>
+        </encoder>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>TRACE</level>
+        </filter>
+    </appender>
+
+    <!-- ✅ 로컬 저장용 : 파일 출력 -->
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${LOG_FILE}</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>log/application.%d{yyyy-MM-dd_HH-mm}.log</fileNamePattern>
+            <fileNamePattern>log/application.%d{yyyy-MM-dd_HH}.log</fileNamePattern>
             <maxHistory>30</maxHistory>
         </rollingPolicy>
         <encoder>
             <pattern>%d{yyyy-MM-dd HH:mm:ss} %-5level [%thread] %logger{36} - %msg%n</pattern>
         </encoder>
+<!--        지정된 임계점(threshold)보다 낮은 레벨의 로그는 아예 그 Appender로 통과시키지 않고 버립니다.-->
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>INFO</level>
+        </filter>
     </appender>
 
-    <root level="trace">
+
+    <!--    <logger> 태그는 애플리케이션 내의 특정 패키지(또는 클래스)에 해당하는 로거(Logger)에 대해 개별적인 로깅 레벨과 연결할 Appender를 설정할 때 사용-->
+    <logger name="org.hibernate.SQL" level="DEBUG" additivity="false">
+        <!--        additivity="false"로 설정되어 있으므로, -->
+        <!--        org.hibernate.SQL에서 발생하는 모든 DEBUG 레벨 이상의 로그 이벤트는 오직 명시된 Appender(CONSOLE Appender)로만 전달-->
+        <appender-ref ref="SQL_CONSOLE"/>
+    </logger>
+
+    <logger name="org.hibernate.orm.jdbc.bind" level="TRACE" additivity="false">
+        <!--        SQL 파라미터 바인딩 정보를 TRACE 레벨로 콘솔에만 출력-->
+        <appender-ref ref="SQL_CONSOLE"/>
+    </logger>
+
+    <!--    <root> 태그는 Logback의 최상위(root) 로거를 설정합니다. 모든 로거들은 계층적으로 root 로거 아래에 존재합니다. -->
+    <!--    특정 <logger>로 설정되지 않은 모든 로그 이벤트는 최종적으로 root 로거-->
+    <!--    INFO 이상의 레벨만 아래 작업들을 수행 (일반 애플리케이션 로그)-->
+    <root level="INFO">
         <appender-ref ref="CONSOLE"/>
         <appender-ref ref="FILE"/>
         <appender-ref ref="LOGSTASH"/>

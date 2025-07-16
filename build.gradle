@@ -177,6 +177,19 @@ project(':transfer-log-infra') {
     }
 }
 
+project(':dlq-infra') {
+    configureQueryDsl(project)
+    databaseDependencies(project)
+
+    dependencies {
+        implementation project(':common')
+        implementation project(':transfer-log-domain')
+        implementation project(':dlq-domain')
+
+        implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    }
+}
+
 //---- 🌟 Domain Layer ----
 project(':member-domain') {
     dependencies {
@@ -228,6 +241,15 @@ project(':transfer-domain') {
 project(':transfer-log-domain') {
     dependencies {
         implementation 'org.springframework:spring-context'
+        implementation "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
+
+        implementation project(':common')
+    }
+}
+
+project(':dlq-domain') {
+    dependencies {
+        implementation 'org.springframework:spring-context'
 
         implementation project(':common')
     }
@@ -237,11 +259,16 @@ project(':reminder') {
     dependencies {
         implementation 'org.springframework:spring-context'
 
+        // slack
+        implementation "com.slack.api:slack-api-client:${slackVersion}" // 슬랙 API 클라이언트
+
         implementation project(':member-domain')
         implementation project(':transfer-domain')
         implementation project(':common')
     }
 }
+
+
 
 //---- 🌐 Interface Layer ----
 project(':interface') {
@@ -262,6 +289,8 @@ project(':interface') {
         implementation project(':settlement-domain')
         implementation project(':transfer-domain')
         implementation project(':transfer-log-domain')
+        implementation project(':dlq-domain')
+        implementation project(':dlq-infra')  // 🔥 이 라인 추가
         implementation project(':common')
     }
 }
@@ -269,6 +298,11 @@ project(':interface') {
 project(':batch') {
     dependencies {
         implementation project(':interface')
+        implementation project(':dlq-domain')
+        implementation project(':transfer-log-domain')
+        implementation project(':common')
+
+        implementation "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
         implementation "org.springframework.boot:spring-boot-starter-batch"
     }
 }
@@ -291,6 +325,12 @@ project(':common') {
 
 project(':app') {
     dependencies {
+        // Spring Boot Actuator: 애플리케이션 모니터링 및 관리 엔드포인트 제공
+        implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
+        // Micrometer Prometheus Registry: Actuator 메트릭을 Prometheus 형식으로 변환
+        runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
+
         // logstash
         implementation "net.logstash.logback:logstash-logback-encoder:${logstashVersion}"
 
@@ -318,7 +358,10 @@ project(':app') {
         implementation project(':transfer-infra')
         implementation project(':transfer-log-domain')
         implementation project(':transfer-log-infra')
+        implementation project(':dlq-domain')
+        implementation project(':dlq-infra')
         implementation project(':interface')
         implementation project(':common')
+        implementation project(':batch')
     }
 }
