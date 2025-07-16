@@ -36,6 +36,21 @@ springdoc:
   swagger-ui:
     tags-sorter: alpha
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: prometheus
+      # base-path: / # /metrics 로 바로 접근하고 싶다면 이 주석을 해제하고 아래 path-mapping 추가
+      # path-mapping:
+      #   prometheus: metrics # /actuator/prometheus 대신 /metrics 로 매핑
+  metrics:
+    web:
+      server:
+        request:
+          autotime:
+            enabled: true
+
 logging:
   level:
     root: Info
