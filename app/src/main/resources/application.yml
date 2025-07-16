@@ -51,9 +51,9 @@ management:
           autotime:
             enabled: true
 
-logging:
-  level:
-    root: Info
+#logging:
+#  level:
+#    root: Info
 #    org:
 #      hibernate:
 #        engine:
