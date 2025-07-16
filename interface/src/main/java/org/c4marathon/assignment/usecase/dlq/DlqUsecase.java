@@ -1,5 +1,7 @@
 package org.c4marathon.assignment.usecase.dlq;
 
+import static org.springframework.transaction.annotation.Propagation.*;
+
 import java.util.List;
 
 import org.c4marathon.assignment.domain.model.DlqEntry;
@@ -28,11 +30,17 @@ public class DlqUsecase {
 	private final ObjectMapper objectMapper;
 	private final TransferLogService transferLogService;
 
-	@Transactional
-	public void saveDLQ(Exception e, TransferLog transferLog) throws JsonProcessingException {
-		String payload = objectMapper.writeValueAsString(transferLog);
-		DlqEntry dlqEntry = new DlqEntry("CREATE_TRANSFER_LOG", payload, e.getMessage());
-		dlqEntryService.save(dlqEntry);
+	@Transactional(propagation = REQUIRES_NEW)
+	public void saveDLQ(Exception e, TransferLog transferLog) {
+		try {
+			String payload = objectMapper.writeValueAsString(transferLog);
+			DlqEntry dlqEntry = new DlqEntry("CREATE_TRANSFER_LOG", payload, e.getMessage());
+			dlqEntryService.save(dlqEntry);
+		} catch (Exception dlqException) {
+			// DLQ 저장 실패는 복구 불가능한 심각한 오류이므로, 강력하게 전파
+			log.error("CRITICAL: DLQ 저장 최종 실패. 데이터 유실 가능성 높음.", dlqException);
+			throw new RuntimeException("DLQ 저장에 실패하여 데이터가 유실될 수 있습니다.", dlqException);
+		}
 	}
 
 	/**
@@ -55,7 +63,7 @@ public class DlqUsecase {
 	public void checkDlqMessageCount(int dlqThreshold) {
 		long currentMessageCount = dlqEntryService.getMQSize();
 
-        if (currentMessageCount > dlqThreshold) {
+		if (currentMessageCount > dlqThreshold) {
 			log.warn("DLQ 메시지 수 임계 값({})를 초과했습니다 . 현재 메시지 수: {}", dlqThreshold, currentMessageCount);
 			slackService.sendSlackNotification(dlqThreshold, currentMessageCount);
 		}
