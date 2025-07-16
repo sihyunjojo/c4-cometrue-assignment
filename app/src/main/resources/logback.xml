@@ -1,3 +1,7 @@
+<!--로그 이벤트가 발생하면 이 로그 이벤트는 Logback 시스템 내부로 전달됩니다. -->
+<!--이때 root 로거에 LOGSTASH Appender가 연결되어 있기 때문에, 이 로그 이벤트는:-->
+<!--파일에 기록됩니다 (FILE Appender에 의해).-->
+<!--동시에 LogstashTcpSocketAppender에도 전달됩니다.-->
 <configuration>
     <!-- property 는 파일 내에서 사용할 변수를 지정해주는 것 LOG_FILE 은 변수명 application.log 는 값 -->
     <property name="LOG_FILE" value="log/application.log"/>
