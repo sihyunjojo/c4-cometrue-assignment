@@ -43,9 +43,10 @@ public class DlqEntryService {
 	 * @param entry 업데이트할 DLQ 엔트리
 	 */
 	public void update(DlqEntry entry) {
-		DlqEntry updatedEntity = dlqEntryStoragePort.save(entry); // save는 upsert 역할
+		dlqEntryPublisherPort.removeFromDlqById(entry);
+
 		// 인메모리 큐에서도 업데이트 (기존 엔트리 제거 후 새 엔트리 추가)
-		dlqEntryPublisherPort.replaceById(updatedEntity);
+		DlqEntry updatedEntity = dlqEntryStoragePort.save(entry);
 		dlqEntryPublisherPort.offer(updatedEntity);
 	}
 
@@ -57,7 +58,7 @@ public class DlqEntryService {
 	public void markAsProcessedAndCleanUp(DlqEntry entry) {
 		dlqEntryStoragePort.save(entry);
 		// 인메모리 큐에서도 업데이트 (기존 엔트리 제거)
-		dlqEntryPublisherPort.replaceById(entry);
+		dlqEntryPublisherPort.removeFromDlqById(entry);
 	}
 
 	public int getMQSize() {
