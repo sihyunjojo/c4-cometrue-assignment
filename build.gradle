@@ -325,6 +325,12 @@ project(':common') {
 
 project(':app') {
     dependencies {
+        // Spring Boot Actuator: 애플리케이션 모니터링 및 관리 엔드포인트 제공
+        implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
+        // Micrometer Prometheus Registry: Actuator 메트릭을 Prometheus 형식으로 변환
+        runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
+
         // logstash
         implementation "net.logstash.logback:logstash-logback-encoder:${logstashVersion}"
 
